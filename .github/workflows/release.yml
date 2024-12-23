@@ -1,0 +1,42 @@
+name: Release Charts
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Run helm-docs
+        uses: losisin/helm-docs-github-action@v1
+        with:
+          git-push: true
+
+      # TODO Disabled for now while 0.0.1 versions are being reworked and documented
+      #- name: Run chart-releaser
+      #  id: releaser
+      #  uses: helm/chart-releaser-action@v1.6.0
+      #  env:
+      #    CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      #  with:
+      #    skip_existing: true
+
