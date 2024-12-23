@@ -31,12 +31,11 @@ jobs:
         with:
           git-push: true
 
-      # TODO Disabled for now while 0.0.1 versions are being reworked and documented
-      #- name: Run chart-releaser
-      #  id: releaser
-      #  uses: helm/chart-releaser-action@v1.6.0
-      #  env:
-      #    CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-      #  with:
-      #    skip_existing: true
+      - name: Run chart-releaser
+        id: releaser
+        uses: helm/chart-releaser-action@v1.6.0
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        with:
+          skip_existing: true
 
