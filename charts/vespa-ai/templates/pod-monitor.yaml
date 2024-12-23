@@ -15,7 +15,7 @@ spec:
   podMetricsEndpoints:
     {{- range .Values.podMonitor.endpoints }}
     - interval: {{ default .interval "60s" }}
-      port: {{ .port }}
+      port: port-{{ .port }}
       path: {{ .path }}
 {{- if .bearerTokenSecret }}
       bearerTokenSecret:

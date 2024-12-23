@@ -1,6 +1,12 @@
 {{- range $configName, $configContent := .Values.statefulSets }}
 {{- if ne $configContent.enabled false }}
 {{- $volumes := pluck "path" (default (dict) $configContent.volumes) }}
+{{- $ports := default (list) $configContent.ports }}
+{{- if $.Values.podMonitor.enabled }}
+{{- range $endpointIdx, $podMonitorEndpoint := $.Values.podMonitor.endpoints }}
+  {{- $ports = append $ports $podMonitorEndpoint.port }}
+{{- end }}
+{{- end }}
 {{- if $configContent.ports }}
 ---
 apiVersion: v1
@@ -88,9 +94,9 @@ spec:
           image: {{ $.Values.images.vespa.repository }}:{{ $.Values.images.vespa.tag }}
           imagePullPolicy: IfNotPresent
           args: {{ toYaml $configContent.args | nindent 12 }}
-{{- if $configContent.ports }}
+{{- if $ports }}
           ports:
-{{- range $port := $configContent.ports }}
+{{- range $port := $ports }}
             - name: port-{{ $port }}
               containerPort: {{ $port }}
               protocol: TCP

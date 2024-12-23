@@ -18,7 +18,7 @@ podMonitor:
   additionalLabels:
     release: victoria-metrics-k8s-stack
   endpoints:
-    - port: port-19092
+    - port: '19092'
       path: /prometheus/v1/values
       interval: 60s
 
@@ -30,7 +30,6 @@ statefulSets:
     replicaCount: 3
     ports:
       - '19071'
-      - '19092'
     volumes:
       var:
         path: '/opt/vespa/var'
@@ -44,7 +43,6 @@ statefulSets:
     replicaCount: 3
     ports:
       - '8081'
-      - '19092'
     volumes:
       var:
         path: '/opt/vespa/var'
