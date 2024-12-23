@@ -23,10 +23,35 @@ podMonitor:
       interval: 60s
 
 statefulSets:
+  single:
+    # -- Enable the "single" preconfigured statefulset
+    enabled: false
+    # -- Vespa startup args. `configserver` is necessary for a vespa configserver. `services` is necessary for slobroks and/or content.
+    args: ['configserver,services']
+    replicaCount: 1
+    ports:
+      - '19071'
+      - '8081'
+    volumes:
+      var:
+        path: '/opt/vespa/var'
+        size: 50Gi
+        className: gp3
+        accessModes: ["ReadWriteOnce"]
+    resources:
+      limits:
+        cpu: "5"
+        memory: "14Gi"
+      requests:
+        cpu: "3"
+        memory: "10Gi"
+
   cfg:
     # -- Enable the "cfg" preconfigured statefulset
     enabled: false
+    # -- Vespa startup args. `configserver` is necessary for a vespa configserver. `services` is necessary for slobroks and/or content.
     args: ['configserver,services']
+    # -- Set replica count for this statefulset
     replicaCount: 3
     ports:
       - '19071'
@@ -39,6 +64,7 @@ statefulSets:
   content:
     # -- Enable the "content" preconfigured statefulset
     enabled: false
+    # -- Vepsa startup args. `services` alone is necessary for content nodes.
     args: ['services']
     replicaCount: 3
     ports:
