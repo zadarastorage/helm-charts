@@ -1,0 +1,7 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aws-meta
+data:
+  endpoint: {{ tpl $.Values.serviceOverrides.ec2.Url $ }}

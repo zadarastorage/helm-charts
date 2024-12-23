@@ -1,0 +1,17 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloud-config
+data:
+  cloud.conf: |
+    [Global]
+    Zone={{ tpl (default $.Values.default.region $.Values.global.region) $ }}
+{{- range $svc, $cfg := $.Values.serviceOverrides }}
+
+    [ServiceOverride "{{ $svc }}"]
+    Service={{ $svc }}
+    Region={{ tpl (default $.Values.default.region $cfg.region) $ }}
+    SigningRegion={{ tpl (default $.Values.default.signingRegion $cfg.signingRegion) $ }}
+    URL={{ tpl $cfg.Url $ }}
+{{- end }}
