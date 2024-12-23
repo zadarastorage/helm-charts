@@ -1,0 +1,31 @@
+{{- if .Values.podMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ default $.Release.Name $.Values.nameOverride }}-metrics
+  labels:
+    name: {{ default $.Release.Name $.Values.nameOverride }}-metrics
+    app.kubernetes.io/name: {{ default $.Release.Name $.Values.nameOverride }}
+    app.kubernetes.io/instance: {{ default $.Release.Name $.Values.nameOverride }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- if .Values.podMonitor.additionalLabels }}
+{{ toYaml .Values.podMonitor.additionalLabels | indent 4 }}
+{{- end }}
+spec:
+  podMetricsEndpoints:
+    {{- range .Values.podMonitor.endpoints }}
+    - interval: {{ default .interval "60s" }}
+      port: {{ .port }}
+      path: {{ .path }}
+{{- if .bearerTokenSecret }}
+      bearerTokenSecret:
+{{ toYaml .bearerTokenSecret | indent 8 }}
+{{- end }}
+    {{- end }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  selector:
+    matchLabels:
+      app: {{ default $.Release.Name $.Values.nameOverride }}
+{{- end }}

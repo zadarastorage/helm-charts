@@ -1,0 +1,53 @@
+# -- Override name used for vespa resources
+nameOverride: ""
+
+images:
+  vespa:
+    repository: 'vespaengine/vespa'
+    tag: "8.417.13"
+
+configMap:
+  # -- Env Vars applied to all STS/Pods
+  env:
+    VESPA_CONFIGSERVER_JVMARGS: "-Xms32M -Xmx128M"
+    VESPA_CONFIGPROXY_JVMARGS: "-Xms32M -Xmx32M"
+
+podMonitor:
+  # -- Enable podMonitor
+  enabled: false
+  additionalLabels:
+    release: victoria-metrics-k8s-stack
+  endpoints:
+    - port: port-19092
+      path: /prometheus/v1/values
+      interval: 60s
+
+statefulSets:
+  cfg:
+    # -- Enable the "cfg" preconfigured statefulset
+    enabled: false
+    args: ['configserver,services']
+    replicaCount: 3
+    ports:
+      - '19071'
+      - '19092'
+    volumes:
+      var:
+        path: '/opt/vespa/var'
+        size: 10Gi
+        className: gp3
+        accessModes: ["ReadWriteOnce"]
+  content:
+    # -- Enable the "content" preconfigured statefulset
+    enabled: false
+    args: ['services']
+    replicaCount: 3
+    ports:
+      - '8081'
+      - '19092'
+    volumes:
+      var:
+        path: '/opt/vespa/var'
+        size: 10Gi
+        className: gp3
+        accessModes: ["ReadWriteOnce"]

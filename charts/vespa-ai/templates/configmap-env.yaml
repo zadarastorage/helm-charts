@@ -1,0 +1,22 @@
+{{- $cfgName := "" -}}
+{{- $cfgServer := dict -}}
+{{- range $key, $value := $.Values.statefulSets }}
+{{- if ne $value.enabled false }}
+  {{- if or (has "configserver" $value.args) (has "configserver,services" $value.args) (has "services,configserver" $value.args) }}
+    {{- $cfgName = $key }}
+    {{- $cfgServer = $value }}
+  {{- end }}
+{{- end }}
+{{- end }}
+{{- $cfgHosts := list -}}
+{{- range $i, $e := until (default 3 (int $cfgServer.replicaCount)) -}}
+  {{- $cfgHosts = append $cfgHosts (printf "%s-%s-%d.%s-int.%s.svc.cluster.local" (default $.Release.Name $.Values.nameOverride) $cfgName $i (default $.Release.Name $.Values.nameOverride) $.Release.Name ) -}}
+{{- end -}}
+{{- $envData := (dict "VESPA_CONFIGSERVERS" (join "," $cfgHosts) ) -}}
+{{- $envData := merge $envData (default (dict) $.Values.configMap.env) -}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ default $.Release.Name $.Values.nameOverride }}-env
+data: {{ toYaml $envData | nindent 2 }}

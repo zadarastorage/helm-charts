@@ -1,0 +1,167 @@
+{{- range $configName, $configContent := .Values.statefulSets }}
+{{- if ne $configContent.enabled false }}
+{{- $volumes := pluck "path" (default (dict) $configContent.volumes) }}
+{{- if $configContent.ports }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ default $.Release.Name $.Values.nameOverride }}-{{ $configName }}
+  labels:
+    app: {{ default $.Release.Name $.Values.nameOverride }}
+spec:
+  selector:
+    app: {{ default $.Release.Name $.Values.nameOverride }}
+    service: {{ $configName }}
+  ports:
+{{- range $port := $configContent.ports }}
+    - name: port-{{ $port }}
+      port: {{ $port }}
+      targetPort: {{ $port }}
+{{- end }}
+{{- end }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: {{ default $.Release.Name $.Values.nameOverride }}
+    service: {{ $configName }}
+  name: {{ default $.Release.Name $.Values.nameOverride }}-{{ $configName }}
+spec:
+  replicas: {{ default 3 $configContent.replicaCount }}
+  podManagementPolicy: Parallel
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: {{ default $.Release.Name $.Values.nameOverride }}
+      service: {{ $configName }}
+  serviceName: {{ default $.Release.Name $.Values.nameOverride }}-int
+  template:
+    metadata:
+      annotations:
+        checksum/configmap-env: {{ include (print $.Template.BasePath "/configmap-env.yaml") $ | sha256sum }}
+      labels:
+        app: {{ default $.Release.Name $.Values.nameOverride }}
+        service: {{ $configName }}
+    spec:
+      setHostnameAsFQDN: true
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - {{ default $.Release.Name $.Values.nameOverride }}
+              - key: service
+                operator: In
+                values:
+                - {{ $configName }}
+            topologyKey: {{ default "kubernetes.io/hostname" $configContent.topologyKey }}
+{{- if gt (len (default (dict) $configContent.volumes)) 0 }}
+      initContainers:
+        - name: chown
+          image: busybox:1.28
+          securityContext:
+            runAsUser: 0
+          command:
+            - sh
+            - -c
+            - |
+{{- range $volName, $volData := (default (dict) $configContent.volumes) }}
+              chown -R 1000:1000 {{ $volData.path }}
+{{- end }}
+          volumeMounts:
+{{- range $volName, $volData := (default (dict) $configContent.volumes) }}
+            - mountPath: {{ $volData.path }}
+              name: {{ $volName }}
+{{- end }}
+{{- end }}
+{{- if $configContent.runtimeClassName }}
+      runtimeClassName: {{ $configContent.runtimeClassName }}
+{{- end }}
+      containers:
+        - name: {{ default $.Release.Name $.Values.nameOverride }}-{{ $configName }}
+          image: {{ $.Values.images.vespa.repository }}:{{ $.Values.images.vespa.tag }}
+          imagePullPolicy: IfNotPresent
+          args: {{ toYaml $configContent.args | nindent 12 }}
+{{- if $configContent.ports }}
+          ports:
+{{- range $port := $configContent.ports }}
+            - name: port-{{ $port }}
+              containerPort: {{ $port }}
+              protocol: TCP
+{{- end }}
+{{- end }}
+{{- if or (has "configserver" $configContent.args) (has "configserver,services" $configContent.args) (has "services,configserver" $configContent.args) }}
+          readinessProbe:
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            httpGet:
+              path: /state/v1/health
+              port: 19071
+              scheme: HTTP
+          livenessProbe:
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            httpGet:
+              path: /state/v1/health
+              port: 19071
+              scheme: HTTP
+{{- else if $configContent.ports }}
+          startupProbe:
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            httpGet:
+              path: /state/v1/health
+              port: {{ $configContent.ports | first }}
+              scheme: HTTP
+          readinessProbe:
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            httpGet:
+              path: /state/v1/health
+              port: {{ $configContent.ports | first }}
+              scheme: HTTP
+          livenessProbe:
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            httpGet:
+              path: /state/v1/health
+              port: {{ $configContent.ports | first }}
+              scheme: HTTP
+{{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ default $.Release.Name $.Values.nameOverride }}-env
+{{- if $configContent.resources }}
+          resources: {{- toYaml $configContent.resources | nindent 12 }}
+{{- end }}
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+{{- if (gt (len (default (dict) $configContent.volumes)) 0) }}
+          volumeMounts:
+{{- range $volName, $volData := default (dict) $configContent.volumes }}
+            - mountPath: {{ $volData.path }}
+              name: {{ $volName }}
+{{- end }}
+{{- end }}
+{{- if (gt (len (default (dict) $configContent.volumes)) 0) }}
+  volumeClaimTemplates:
+{{- range $volName, $volData := (default (dict) $configContent.volumes) }}
+    - metadata:
+        name: {{ $volName }}
+      spec:
+        accessModes: {{ toYaml (default (list "ReadWriteOnce") $volData.accessModes) | nindent 10 }}
+        resources:
+          requests:
+            storage: {{ default "10Gi" $volData.size }}
+        storageClassName: {{ default "gp3" $volData.className }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,14 @@
+{{- if ne $.Values.enabled false }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{ default $.Release.Name $.Values.nameOverride }}
+  name: {{ default $.Release.Name $.Values.nameOverride }}-int
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  selector:
+    app: {{ default $.Release.Name $.Values.nameOverride }}
+{{- end }}
