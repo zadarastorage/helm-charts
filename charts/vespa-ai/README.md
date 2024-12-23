@@ -14,11 +14,10 @@
 | podMonitor.enabled | bool | `false` | Enable podMonitor |
 | podMonitor.endpoints[0].interval | string | `"60s"` |  |
 | podMonitor.endpoints[0].path | string | `"/prometheus/v1/values"` |  |
-| podMonitor.endpoints[0].port | string | `"port-19092"` |  |
+| podMonitor.endpoints[0].port | string | `"19092"` |  |
 | statefulSets.cfg.args[0] | string | `"configserver,services"` |  |
 | statefulSets.cfg.enabled | bool | `false` | Enable the "cfg" preconfigured statefulset |
 | statefulSets.cfg.ports[0] | string | `"19071"` |  |
-| statefulSets.cfg.ports[1] | string | `"19092"` |  |
 | statefulSets.cfg.replicaCount | int | `3` |  |
 | statefulSets.cfg.volumes.var.accessModes[0] | string | `"ReadWriteOnce"` |  |
 | statefulSets.cfg.volumes.var.className | string | `"gp3"` |  |
@@ -27,7 +26,6 @@
 | statefulSets.content.args[0] | string | `"services"` |  |
 | statefulSets.content.enabled | bool | `false` | Enable the "content" preconfigured statefulset |
 | statefulSets.content.ports[0] | string | `"8081"` |  |
-| statefulSets.content.ports[1] | string | `"19092"` |  |
 | statefulSets.content.replicaCount | int | `3` |  |
 | statefulSets.content.volumes.var.accessModes[0] | string | `"ReadWriteOnce"` |  |
 | statefulSets.content.volumes.var.className | string | `"gp3"` |  |
