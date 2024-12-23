@@ -5,11 +5,11 @@ version_tag: v0.17.1
 
 images:
   backend:
-    repository: 'onyx/onyx-backend'
+    repository: 'onyxdotapp/onyx-backend'
   web:
-    repository: 'onyx/onyx-web-server'
+    repository: 'onyxdotapp/onyx-web-server'
   model:
-    repository: 'onyx/onyx-model-server'
+    repository: 'onyxdotapp/onyx-model-server'
 
 configMap:
   # -- ConfigMap for auth env vars
