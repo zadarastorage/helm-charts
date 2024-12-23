@@ -23,6 +23,29 @@ entries:
     urls:
     - https://github.com/zadarastorage/helm-charts/releases/download/danswer-0.0.1/danswer-0.0.1.tgz
     version: 0.0.1
+  onyx:
+  - apiVersion: v2
+    created: "2024-12-23T23:32:59.909093648Z"
+    dependencies:
+    - condition: redis.enabled
+      name: redis
+      repository: https://charts.bitnami.com/bitnami
+      version: 20.1.7
+    - alias: cnpg
+      condition: cnpg.enabled
+      name: cluster
+      repository: https://cloudnative-pg.github.io/charts
+      version: 0.0.11
+    - alias: vespa
+      condition: vespa.enabled
+      name: vespa-ai
+      repository: https://zadarastorage.github.io/helm-charts
+      version: 0.0.1
+    digest: bb213d64b625111307596fa5af3541bfe94fadfc9737053e45f73c1299685618
+    name: onyx
+    urls:
+    - https://github.com/zadarastorage/helm-charts/releases/download/onyx-0.0.1/onyx-0.0.1.tgz
+    version: 0.0.1
   vespa-ai:
   - apiVersion: v2
     created: "2024-12-23T23:21:06.030954066Z"
@@ -39,4 +62,4 @@ entries:
     urls:
     - https://github.com/zadarastorage/helm-charts/releases/download/zadara-aws-config-0.0.1/zadara-aws-config-0.0.1.tgz
     version: 0.0.1
-generated: "2024-12-23T23:24:13.692774194Z"
+generated: "2024-12-23T23:32:59.909103737Z"
