@@ -1,2 +1,3 @@
 *.swp
-Charts.lock
+Chart.lock
+charts/**/charts
