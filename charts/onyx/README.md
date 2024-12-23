@@ -48,9 +48,9 @@
 | configMap.worker | object | `{"CELERY_WORKER_LIGHT_CONCURRENCY":"32","CELERY_WORKER_LIGHT_PREFETCH_MULTIPLIER":"10"}` | ConfigMap for env vars specific to "worker" pod(s) |
 | hotpatch.enabled | bool | `true` |  |
 | hotpatch.vespaRedundancy | int | `1` |  |
-| images.backend.repository | string | `"onyx/onyx-backend"` |  |
-| images.model.repository | string | `"onyx/onyx-model-server"` |  |
-| images.web.repository | string | `"onyx/onyx-web-server"` |  |
+| images.backend.repository | string | `"onyxdotapp/onyx-backend"` |  |
+| images.model.repository | string | `"onyxdotapp/onyx-model-server"` |  |
+| images.web.repository | string | `"onyxdotapp/onyx-web-server"` |  |
 | index.affinity | object | `{}` |  |
 | index.extraVolumeMounts | list | `[]` |  |
 | index.extraVolumes | list | `[]` |  |
