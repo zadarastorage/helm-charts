@@ -6,9 +6,9 @@
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../vespa-ai | vespa(vespa-ai) | 0.0.1 |
 | https://charts.bitnami.com/bitnami | redis | 20.1.7 |
 | https://cloudnative-pg.github.io/charts | cnpg(cluster) | 0.0.11 |
+| https://zadarastorage.github.io/helm-charts | vespa(vespa-ai) | 0.0.1 |
 
 ## Values
 
