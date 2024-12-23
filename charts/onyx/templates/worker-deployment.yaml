@@ -1,0 +1,118 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations: {}
+  labels:
+    app: {{ default $.Release.Name $.Values.nameOverride }}
+    service: worker
+  name: {{ default $.Release.Name $.Values.nameOverride }}-worker
+spec:
+  replicas: {{ default "1" .Values.worker.replicaCount }}
+  revisionHistoryLimit: {{ default "2" .Values.worker.revisionHistoryLimit }}
+  selector:
+    matchLabels:
+      app: {{ default $.Release.Name $.Values.nameOverride }}
+      service: worker
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/hotpatch: {{ include (print $.Template.BasePath "/onyx-hotpatch.yaml") . | sha256sum }}
+      labels:
+        app: {{ default $.Release.Name $.Values.nameOverride }}
+        service: worker
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - {{ default $.Release.Name $.Values.nameOverride }}
+              - key: service
+                operator: In
+                values:
+                - worker
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+        - image: {{ .Values.images.backend.repository }}:{{ default .Values.version_tag .Values.images.backend.tag }}
+          name: worker
+          command: ["/usr/bin/bash", "/hotpatch/entrypoint.sh"]
+          args:
+            - /usr/bin/supervisord
+            - -c
+            - /etc/supervisor/conf.d/supervisord.conf
+          env:
+            - name: INDEXING_MODEL_SERVER_HOST
+              value: {{ default $.Release.Name $.Values.nameOverride }}-index-svc
+            - name: INDEXING_MODEL_SERVER_PORT
+              value: "80"
+
+            - name: MODEL_SERVER_HOST
+              value: {{ default $.Release.Name $.Values.nameOverride }}-inference-svc
+            - name: MODEL_SERVER_PORT
+              value: "80"
+
+            # PSQL config
+            - name: POSTGRES_HOST
+              valueFrom:
+                secretKeyRef:
+                  key: host
+                  name: {{ default $.Release.Name $.Values.nameOverride }}-cnpg-app
+            - name: POSTGRES_PORT
+              valueFrom:
+                secretKeyRef:
+                  key: port
+                  name: {{ default $.Release.Name $.Values.nameOverride }}-cnpg-app
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: {{ default $.Release.Name $.Values.nameOverride }}-cnpg-app
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: {{ default $.Release.Name $.Values.nameOverride }}-cnpg-app
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  key: dbname
+                  name: {{ default $.Release.Name $.Values.nameOverride }}-cnpg-app
+
+            - name: REDIS_HOST
+              value: {{ default $.Release.Name $.Values.nameOverride }}-redis-master
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default $.Release.Name $.Values.nameOverride }}-redis
+                  key: redis-password
+          envFrom:
+            - configMapRef:
+                name: {{ default $.Release.Name $.Values.nameOverride }}-global
+            - configMapRef:
+                name: {{ default $.Release.Name $.Values.nameOverride }}-auth
+            - configMapRef: # TODO Confirm if worker pod needs web variables
+                name: {{ default $.Release.Name $.Values.nameOverride }}-web
+            - configMapRef:
+                name: {{ default $.Release.Name $.Values.nameOverride }}-vespa
+            - configMapRef:
+                name: {{ default $.Release.Name $.Values.nameOverride }}-worker
+          volumeMounts:
+            - name: hotpatch
+              mountPath: /hotpatch
+{{- if .Values.worker.resources }}
+          resources: {{ toYaml (.Values.worker.resources) | nindent 12 }}
+{{- end }}
+      restartPolicy: Always
+      volumes:
+        - name: hotpatch
+          configMap:
+            name: {{ default $.Release.Name $.Values.nameOverride }}-hotpatch
+{{- if .Values.worker.tolerations }}
+      tolerations: {{ toYaml (.Values.worker.tolerations) | nindent 8 }}
+{{- end }}

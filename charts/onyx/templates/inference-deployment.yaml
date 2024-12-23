@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations: {}
+  labels:
+    app: {{ default $.Release.Name $.Values.nameOverride }}
+    service: inference-server
+  name: {{ default $.Release.Name $.Values.nameOverride }}-inference
+spec:
+  replicas: {{ default "1" .Values.inference.replicaCount }}
+  revisionHistoryLimit: {{ default "2" .Values.inference.revisionHistoryLimit }}
+  selector:
+    matchLabels:
+      app: {{ default $.Release.Name $.Values.nameOverride }}
+      service: inference-server
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+      labels:
+        app: {{ default $.Release.Name $.Values.nameOverride }}
+        service: inference-server
+    spec:
+{{- if .Values.inference.affinity }}
+      affinity: {{ toYaml .Values.inference.affinity | nindent 8 }}
+{{- end }}
+      restartPolicy: Always
+{{- if .Values.inference.runtimeClassName }}
+      runtimeClassName: {{ .Values.inference.runtimeClassName }}
+{{- end }}
+      containers:
+        - image: {{ .Values.images.model.repository }}:{{ default .Values.version_tag .Values.images.model.tag }}
+          name: inference-server
+          command: ["uvicorn", "model_server.main:app", "--host", "0.0.0.0", "--port", "9000"]
+          ports:
+            - name: 'http'
+              containerPort: 9000
+              protocol: TCP
+          readinessProbe:
+            periodSeconds: 15
+            initialDelaySeconds: 15
+            httpGet:
+              path: /api/health
+              port: 9000
+          livenessProbe:
+            periodSeconds: 15
+            initialDelaySeconds: 15
+            httpGet:
+              path: /api/health
+              port: 9000
+          env: []
+          envFrom:
+            - configMapRef:
+                name: {{ default $.Release.Name $.Values.nameOverride }}-global
+            - configMapRef:
+                name: {{ default $.Release.Name $.Values.nameOverride }}-ml
+            - configMapRef:
+                name: {{ default $.Release.Name $.Values.nameOverride }}-inference
+{{- if .Values.inference.resources }}
+          resources: {{ toYaml (.Values.inference.resources) | nindent 12 }}
+{{- end }}
+{{- if .Values.inference.extraVolumeMounts }}
+          volumeMounts: {{ toYaml (.Values.inference.extraVolumeMounts) | nindent 12 }}
+{{- end }}
+{{- if .Values.inference.extraVolumes }}
+      volumes: {{ toYaml (.Values.inference.extraVolumes) | nindent 8 }}
+{{- end }}
+{{- if .Values.inference.tolerations }}
+      tolerations: {{ toYaml (.Values.inference.tolerations) | nindent 8 }}
+{{- end }}

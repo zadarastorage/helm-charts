@@ -1,0 +1,149 @@
+{{- if ne $.Values.hotpatch.enabled false }}
+{{- $hostCfg := (dict) -}}
+{{- $dataServers := (list) -}}
+{{- $configServers := (list) -}}
+{{- $mixedServers := (list) -}}
+{{- range $stsName, $stsConfig := $.Values.vespa.statefulSets -}}
+  {{- if ne $stsConfig.enabled false }}
+  {{- range $i, $e := until (default 3 (int $stsConfig.replicaCount)) -}}
+    {{- $headless := printf "%s-int" (default $.Release.Name $.Values.vespa.nameOverride) -}}
+    {{- $hostAlias := printf "%s-%s-%d" (default $.Release.Name $.Values.vespa.nameOverride) $stsName $i -}}
+    {{- $hostFqdn := printf "%s.%s.%s.svc.cluster.local" $hostAlias $headless $.Release.Name -}}
+    {{- $hostCfg = merge $hostCfg (dict $hostAlias $hostFqdn) -}}
+    {{- if or (has "configserver,services" $stsConfig.args) (has "services,configserver" $stsConfig.args) -}}
+      {{- $mixedServers = append $mixedServers $hostAlias -}}
+    {{- end -}}
+    {{- if has "configserver" $stsConfig.args -}}
+      {{- $configServers = append $configServers $hostAlias -}}
+    {{- end -}}
+    {{- if has "services" $stsConfig.args -}}
+      {{- $dataServers = append $dataServers $hostAlias -}}
+    {{- end -}}
+  {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- $configServers := concat $configServers $mixedServers -}}
+{{- if eq (len $dataServers) 0 -}}
+  {{- $dataServers = concat $dataServers $mixedServers -}}
+{{- end -}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ default $.Release.Name $.Values.nameOverride }}-hotpatch
+data:
+  entrypoint.sh: |
+    #!/bin/bash
+    set -e
+    echo "== Hotpatching the container"
+    echo "== Installing patch"
+    apt-get -y update > /dev/null 2>&1
+    apt-get -y install patch > /dev/null 2>&1
+    prefix='/app/danswer'
+    [[ -d '/app/onyx' ]] && prefix='/app/onyx'
+    echo "== Copying vespa hosts.xml"
+    cp /hotpatch/hosts.xml ${prefix}/document_index/vespa/app_config/hosts.xml
+    echo "== Replacing ${prefix}/document_index/vespa/app_config/services.xml"
+    cp /hotpatch/services.xml ${prefix}/document_index/vespa/app_config/services.xml
+
+    for x in 'configs/app_configs.py' 'connectors/web/connector.py' 'connectors/zendesk/connector.py' 'document_index/vespa/index.py'; do
+      echo "== Modifying ${prefix}/${x}"
+      md5sum ${prefix}/${x}
+      WEB_CONNECTOR=$(md5sum ${prefix}/${x} | cut -d ' ' -f1)
+      if [[ -e /hotpatch/${WEB_CONNECTOR}.patch ]]; then
+        patch -p1 -u ${x} -i /hotpatch/${WEB_CONNECTOR}.patch
+        md5sum ${prefix}/${x}
+      fi
+    done
+
+    echo "== Starting: ${@}"
+    exec "${@}"
+
+# Patches
+{{- range $path, $_ :=  .Files.Glob  "hotpatches/**.patch" }}
+  {{ base $path }}: |
+    {{- $.Files.Get $path | nindent 4 }}
+{{- end }}
+
+  hosts.xml: |
+    <hosts>
+      {{- range $hostAlias, $hostFqdn := $hostCfg }}
+        <host name="{{ $hostFqdn }}">
+            <alias>{{ $hostAlias }}</alias>
+        </host>
+      {{- end }}
+    </hosts>
+  services.xml: |
+    <?xml version="1.0" encoding="utf-8" ?>
+    <services version="1.0">
+        <admin version="2.0">
+            <configservers>
+            {{- range $i, $e := ($configServers | uniq | sortAlpha) }}
+                <configserver hostalias="{{ $e }}" />
+            {{- end }}
+            </configservers>
+            <cluster-controllers>
+            {{- range $i, $e := ($configServers | uniq | sortAlpha) }}
+                <cluster-controller hostalias="{{ $e }}" />
+            {{- end }}
+            </cluster-controllers>
+            <slobroks>
+            {{- range $i, $e := ($configServers | uniq | sortAlpha) }}
+                <slobrok hostalias="{{ $e }}" />
+            {{- end }}
+            </slobroks>
+
+            <adminserver hostalias="{{ $configServers | uniq | sortAlpha | first }}" />
+        </admin>
+        <container id="default" version="1.0">
+            <document-api/>
+            <search/>
+            <http>
+                <server id="default" port="8081"/>
+            </http>
+            <nodes>
+            {{- range $i, $e := ($dataServers | uniq | sortAlpha) }}
+                <node hostalias="{{ $e }}" />
+            {{- end }}
+                <!-- <node hostalias="danswer-node" /> -->
+            </nodes>
+        </container>
+        <content id="danswer_index" version="1.0">
+            <redundancy>{{ default "1" $.Values.hotpatch.vespaRedundancy }}</redundancy>
+            <documents>
+                <!-- <document type="danswer_chunk" mode="index" /> -->
+                DOCUMENT_REPLACEMENT
+            </documents>
+            <nodes>
+            {{- range $i, $e := ($dataServers | uniq | sortAlpha) }}
+                <node hostalias="{{ $e }}" distribution-key={{ $i | quote }} />
+            {{- end }}
+                <!-- <node hostalias="danswer-node" distribution-key="0" /> -->
+            </nodes>
+            <tuning>
+                <resource-limits>
+                    <!-- Default is 75% but this can be increased for Dockerized deployments -->
+                    <!-- https://docs.vespa.ai/en/operations/feed-block.html -->
+                    <disk>0.75</disk>
+                </resource-limits>
+            </tuning>
+            <engine>
+                <proton>
+                    <tuning>
+                        <searchnode>
+                            <requestthreads>
+                                <persearch>SEARCH_THREAD_NUMBER</persearch>
+                            </requestthreads>
+                        </searchnode>
+                    </tuning>
+                </proton>
+            </engine>
+            <config name="vespa.config.search.summary.juniperrc">
+                <max_matches>3</max_matches>
+                <length>750</length>
+                <surround_max>350</surround_max>
+                <min_length>300</min_length>
+            </config>
+        </content>
+    </services>
+{{- end }}

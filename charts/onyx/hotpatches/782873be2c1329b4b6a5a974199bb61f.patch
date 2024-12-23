@@ -1,0 +1,35 @@
+# /app/danswer/connectors/web/connector.py v0.6.0
+diff --git a/app/danswer/connectors/web/connector.py b/app/danswer/connectors/web/connector.py
+index bb1f64ef..2a9aefdc 100644
+--- a/app/danswer/connectors/web/connector.py
++++ b/app/danswer/connectors/web/connector.py
+@@ -84,7 +84,8 @@ def protected_url_check(url: str) -> None:
+ 
+ def check_internet_connection(url: str) -> None:
+     try:
+-        response = requests.get(url, timeout=3)
++        headers = { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3" }
++        response = requests.get(url, timeout=3, headers=headers)
+         response.raise_for_status()
+     except requests.exceptions.HTTPError as e:
+         # Extract status code from the response, defaulting to -1 if response is None
+@@ -166,7 +167,8 @@ def start_playwright() -> Tuple[Playwright, BrowserContext]:
+ 
+ 
+ def extract_urls_from_sitemap(sitemap_url: str) -> list[str]:
+-    response = requests.get(sitemap_url)
++    headers = { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3" }
++    response = requests.get(sitemap_url, headers=headers)
+     response.raise_for_status()
+ 
+     soup = BeautifulSoup(response.content, "html.parser")
+@@ -295,7 +297,8 @@ class WebConnector(LoadConnector):
+ 
+                 if current_url.split(".")[-1] == "pdf":
+                     # PDF files are not checked for links
+-                    response = requests.get(current_url)
++                    headers = { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3" }
++                    response = requests.get(current_url, headers=headers)
+                     page_text, metadata = read_pdf_file(
+                         file=io.BytesIO(response.content)
+                     )

@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations: {}
+  labels:
+    app: {{ default $.Release.Name $.Values.nameOverride }}
+    service: index-server
+  name: {{ default $.Release.Name $.Values.nameOverride }}-index
+spec:
+  replicas: {{ default "1" .Values.index.replicaCount }}
+  revisionHistoryLimit: {{ default "2" .Values.index.revisionHistoryLimit }}
+  selector:
+    matchLabels:
+      app: {{ default $.Release.Name $.Values.nameOverride }}
+      service: index-server
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+      labels:
+        app: {{ default $.Release.Name $.Values.nameOverride }}
+        service: index-server
+    spec:
+{{- if .Values.index.affinity }}
+      affinity: {{ toYaml .Values.index.affinity | nindent 8 }}
+{{- end }}
+      restartPolicy: Always
+{{- if .Values.index.runtimeClassName }}
+      runtimeClassName: {{ .Values.index.runtimeClassName }}
+{{- end }}
+      containers:
+        - image: {{ .Values.images.model.repository }}:{{ default .Values.version_tag .Values.images.model.tag }}
+          name: index-server
+          command: ["uvicorn", "model_server.main:app", "--host", "0.0.0.0", "--port", "9000"]
+          ports:
+            - name: 'http'
+              containerPort: 9000
+              protocol: TCP
+          readinessProbe:
+            periodSeconds: 15
+            initialDelaySeconds: 15
+            httpGet:
+              path: /api/health
+              port: 9000
+          livenessProbe:
+            periodSeconds: 15
+            initialDelaySeconds: 15
+            httpGet:
+              path: /api/health
+              port: 9000
+          env:
+            - name: INDEXING_ONLY
+              value: "True"
+          envFrom:
+            - configMapRef:
+                name: {{ default $.Release.Name $.Values.nameOverride }}-global
+            - configMapRef:
+                name: {{ default $.Release.Name $.Values.nameOverride }}-ml
+            - configMapRef:
+                name: {{ default $.Release.Name $.Values.nameOverride }}-index
+{{- if .Values.index.resources }}
+          resources: {{ toYaml (.Values.index.resources) | nindent 12 }}
+{{- end }}
+{{- if .Values.index.extraVolumeMounts }}
+          volumeMounts: {{ toYaml (.Values.index.extraVolumeMounts) | nindent 12 }}
+{{- end }}
+{{- if .Values.index.extraVolumes }}
+      volumes: {{ toYaml (.Values.index.extraVolumes) | nindent 8 }}
+{{- end }}
+{{- if .Values.index.tolerations }}
+      tolerations: {{ toYaml (.Values.index.tolerations) | nindent 8 }}
+{{- end }}

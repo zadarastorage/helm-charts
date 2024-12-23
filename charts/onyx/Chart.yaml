@@ -1,0 +1,23 @@
+apiVersion: v2
+name: danswer
+version: 0.0.1
+dependencies:
+  - name: redis
+    version: 20.1.7
+    repository: https://charts.bitnami.com/bitnami
+    condition: redis.enabled
+  - name: cluster
+    version: 0.0.11
+    repository: https://cloudnative-pg.github.io/charts
+    alias: cnpg
+    condition: cnpg.enabled
+  - name: vespa-ai
+    version: 0.0.1
+    #repository: https://zadarastorage.github.io/helm-charts
+    repository: "file://../vespa-ai"
+    alias: vespa
+    condition: vespa.enabled
+#  - name: vespa
+#    version: 0.2.3
+#    repository: https://unoplat.github.io/vespa-helm-charts
+#    condition: vespa.enabled

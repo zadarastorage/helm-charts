@@ -1,0 +1,240 @@
+# -- Override Release Name
+nameOverride: ""
+# -- Default version tag for container images
+version_tag: v0.17.1
+
+images:
+  backend:
+    repository: 'onyx/onyx-backend'
+  web:
+    repository: 'onyx/onyx-web-server'
+  model:
+    repository: 'onyx/onyx-model-server'
+
+configMap:
+  # -- ConfigMap for auth env vars
+  auth:
+    AUTH_TYPE: disabled
+    DANSWER_BOT_SLACK_APP_TOKEN: ''
+    DANSWER_BOT_SLACK_BOT_TOKEN: ''
+    GOOGLE_OAUTH_CLIENT_ID: ''
+    GOOGLE_OAUTH_CLIENT_SECRET: ''
+  # -- ConfigMap for vespa configuration env vars
+  vespa:
+    # -- Set to name of vespa "config" statefulset
+    VESPA_CONFIG_SERVER_HOST: "vespa-single"
+    VESPA_TENANT_PORT: "19071"
+    # -- Set to name of vespa "content" statefulset
+    VESPA_HOST: "vespa-single"
+    VESPA_PORT: "8081"
+
+  # -- ConfigMap for env vars for all onyx pods
+  global: {}
+  # -- ConfigMap for env vars specific to "api" pod(s)
+  api: {}
+  # -- ConfigMap for env vars specific to "web" pod(s)
+  web:
+    WEB_DOMAIN: http://localhost:3000
+    SESSION_EXPIRE_TIME_SECONDS: "86400"
+    ENCRYPTION_KEY_SECRET: 'TODO-ENCRYPTION_KEY_SECRET' # TODO Make this a proper secret
+    DISABLE_LLM_CHUNK_FILTER: 'True'
+    DISABLE_LLM_QUERY_REPHRASE: 'True'
+    QA_TIMEOUT: '120'
+  # -- ConfigMap for env vars specific to "worker" pod(s)
+  worker:
+    CELERY_WORKER_LIGHT_CONCURRENCY: '32' # Default is 24
+    CELERY_WORKER_LIGHT_PREFETCH_MULTIPLIER: '10' # Default is 8
+
+  # -- Common ConfigMap to both index and inference pods
+  ml:
+    LOG_LEVEL: info
+    MIN_THREADS_ML_MODELS: "10"
+
+  # -- ConfigMap for env vars specific to "index" pod(s)
+  index:
+    VESPA_SEARCHER_THREADS: "4"
+    NUM_INDEXING_WORKERS: "2"
+  # -- ConfigMap for env vars specific to "inference" pod(s)
+  inference: {}
+
+hotpatch:
+  enabled: true
+  vespaRedundancy: 1 # Prefer 2
+
+ingress:
+  # -- Enable ingress
+  enabled: false
+  ingressClassName: traefik
+  annotations: {}
+    # cert-manager.io/cluster-issuer: selfsigned
+  # -- Set ingress domain name. Optional(If not specified, creates catch all with https disabled)
+  hostname: ""
+  # -- Enable TLS
+  tls: false
+
+# Core services
+web:
+  # -- Set number of web replicas
+  replicaCount: 1 # Prefer 2
+  resources:
+    limits: {}
+    requests:
+      cpu: "0.1"
+      memory: "512Mi"
+api:
+  # -- Set number of api replicas
+  replicaCount: 1
+  resources:
+    limits: {}
+    requests:
+      cpu: "0.1"
+      memory: "1Gi"
+
+worker:
+  # -- Set number of background worker pods.
+  # Currently breaks when > 1.
+  replicaCount: 1 # TODO Identify upstream why workers break when scaled up
+  resources:
+    limits: {}
+    requests:
+      cpu: "2"
+      memory: "4Gi"
+
+# Core model services
+inference:
+  # -- Set number of inference pods.
+  # Untested >1
+  replicaCount: 1
+  runtimeClassName: nvidia
+  resources:
+    limits:
+      nvidia.com/gpu: "4"
+    requests:
+      cpu: "0.1"
+      memory: "2Gi"
+      nvidia.com/gpu: "4"
+  extraVolumes: []
+  extraVolumeMounts: []
+  tolerations:
+    - { effect: "NoSchedule", operator: "Exists", key: "nvidia.com/gpu" }
+  affinity: {}
+
+index:
+  # -- Set number of inference pods.
+  # Untested >1
+  replicaCount: 1
+  runtimeClassName: nvidia
+  resources:
+    limits:
+      nvidia.com/gpu: "4"
+    requests:
+      cpu: "0.1"
+      memory: "2Gi"
+      nvidia.com/gpu: "4"
+  extraVolumes: []
+  extraVolumeMounts: []
+  tolerations:
+    - { effect: "NoSchedule", operator: "Exists", key: "nvidia.com/gpu" }
+  affinity: {}
+
+# Vespa
+vespa:
+  nameOverride: "vespa"
+  configMap:
+    env:
+      VESPA_CONFIGSERVER_JVMARGS: "-Xms128M -Xmx1G"
+      VESPA_CONFIGPROXY_JVMARGS: "-Xms128M -Xmx1G"
+
+  statefulSets:
+    single:
+      enabled: true
+      volumes:
+        var:
+          path: '/opt/vespa/var'
+          size: 50Gi
+          className: gp3
+          accessModes: ["ReadWriteOnce"]
+      resources:
+        limits:
+          cpu: "5"
+          memory: "14Gi"
+        requests:
+          cpu: "3"
+          memory: "10Gi"
+    cfg:
+      enabled: false
+      replicaCount: 3
+      volumes:
+        var:
+          path: '/opt/vespa/var'
+          size: 20Gi
+          className: gp3
+          accessModes: ["ReadWriteOnce"]
+      resources:
+        limits:
+          cpu: "5"
+          memory: "12Gi"
+        requests:
+          cpu: "3"
+          memory: "8Gi"
+    content:
+      enabled: false
+      replicaCount: 3
+      ports:
+        - '8081'
+      volumes:
+        var:
+          path: '/opt/vespa/var'
+          size: 60Gi
+          className: gp3
+      resources:
+        limits:
+          cpu: "10"
+          memory: "18Gi"
+        requests:
+          cpu: "5"
+          memory: "10Gi"
+
+cnpg:
+  enabled: true
+  type: postgresql
+  mode: standalone
+  backups:
+    enabled: false
+  cluster:
+    instances: 3
+    affinity:
+      topologyKey: kubernetes.io/hostname
+    postgresql:
+      # -- Max psql connections. Default was 100
+      max_connections: '500'
+      # -- Max locks per transaction. Default was 64
+      max_locks_per_transaction: '128'
+    monitoring:
+      enabled: true
+      additionalLabels:
+        release: victoria-metrics-k8s-stack
+  pooler:
+    enabled: true
+    instances: 2
+    parameters:
+      # -- Pool size. Default was 25
+      default_pool_size: '50'
+      # -- Reservice pool size, default was 0/disabled
+      reserve_pool_size: '25'
+      # -- Max client connections, default was 1000
+      max_client_conn: '1000' # Default is 1000
+    monitoring:
+      enabled: true
+      additionalLabels:
+        release: victoria-metrics-k8s-stack
+
+redis:
+  enabled: true
+  architecture: standalone # TODO Couldn't get sentinel to work
+  master:
+    revisionHistoryLimit: 2
+    resourcesPreset: medium
+  auth:
+    sentinel: false
+    password: "correct-horse-battery-staple"

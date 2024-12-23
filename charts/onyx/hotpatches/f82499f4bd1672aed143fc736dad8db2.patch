@@ -1,0 +1,17 @@
+# /app/danswer/configs/app_configs.py v0.16.0
+diff --git a/app/danswer/configs/app_configs.py b/app/danswer/configs/app_configs.py
+index 817f060..1456171 100644
+--- a/app/danswer/configs/app_configs.py
++++ b/app/danswer/configs/app_configs.py
+@@ -366,6 +366,11 @@ ZENDESK_CONNECTOR_SKIP_ARTICLE_LABELS = os.environ.get(
+     "ZENDESK_CONNECTOR_SKIP_ARTICLE_LABELS", ""
+ ).split(",")
+ 
++# comma delimited list of zendesk ticket tags to skip indexing for
++ZENDESK_CONNECTOR_SKIP_TICKET_TAGS = os.environ.get(
++    "ZENDESK_CONNECTOR_SKIP_TICKET_TAGS", ""
++).split(",")
++
+ 
+ #####
+ # Indexing Configs
