@@ -211,7 +211,7 @@ cnpg:
       # -- Max locks per transaction. Default was 64
       max_locks_per_transaction: '128'
     monitoring:
-      enabled: true
+      enabled: false
       additionalLabels:
         release: victoria-metrics-k8s-stack
   pooler:
@@ -225,7 +225,7 @@ cnpg:
       # -- Max client connections, default was 1000
       max_client_conn: '1000' # Default is 1000
     monitoring:
-      enabled: true
+      enabled: false
       additionalLabels:
         release: victoria-metrics-k8s-stack
 
