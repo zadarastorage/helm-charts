@@ -2,6 +2,28 @@ apiVersion: v1
 entries:
   onyx:
   - apiVersion: v2
+    created: "2025-01-09T17:43:18.768395063Z"
+    dependencies:
+    - condition: redis.enabled
+      name: redis
+      repository: https://charts.bitnami.com/bitnami
+      version: 20.1.7
+    - alias: cnpg
+      condition: cnpg.enabled
+      name: cluster
+      repository: https://cloudnative-pg.github.io/charts
+      version: 0.0.11
+    - alias: vespa
+      condition: vespa.enabled
+      name: vespa-ai
+      repository: https://zadarastorage.github.io/helm-charts
+      version: 0.0.2
+    digest: 7921ef7af383ac2171dbb7125294351d944298172e13823d78528dea246a3505
+    name: onyx
+    urls:
+    - https://github.com/zadarastorage/helm-charts/releases/download/onyx-0.0.3/onyx-0.0.3.tgz
+    version: 0.0.3
+  - apiVersion: v2
     created: "2024-12-26T17:26:36.151629814Z"
     dependencies:
     - condition: redis.enabled
@@ -68,4 +90,4 @@ entries:
     urls:
     - https://github.com/zadarastorage/helm-charts/releases/download/zadara-aws-config-0.0.1/zadara-aws-config-0.0.1.tgz
     version: 0.0.1
-generated: "2025-01-09T17:39:55.320236615Z"
+generated: "2025-01-09T17:43:18.768409319Z"
