@@ -159,7 +159,9 @@ spec:
 {{- if (gt (len (default (dict) $configContent.volumes)) 0) }}
   volumeClaimTemplates:
 {{- range $volName, $volData := (default (dict) $configContent.volumes) }}
-    - metadata:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
         name: {{ $volName }}
       spec:
         accessModes: {{ toYaml (default (list "ReadWriteOnce") $volData.accessModes) | nindent 10 }}
