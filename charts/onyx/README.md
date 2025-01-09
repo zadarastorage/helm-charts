@@ -22,7 +22,7 @@
 | cnpg.cluster.affinity.topologyKey | string | `"kubernetes.io/hostname"` |  |
 | cnpg.cluster.instances | int | `3` |  |
 | cnpg.cluster.monitoring.additionalLabels.release | string | `"victoria-metrics-k8s-stack"` |  |
-| cnpg.cluster.monitoring.enabled | bool | `true` |  |
+| cnpg.cluster.monitoring.enabled | bool | `false` |  |
 | cnpg.cluster.postgresql.max_connections | string | `"500"` | Max psql connections. Default was 100 |
 | cnpg.cluster.postgresql.max_locks_per_transaction | string | `"128"` | Max locks per transaction. Default was 64 |
 | cnpg.enabled | bool | `true` |  |
@@ -30,7 +30,7 @@
 | cnpg.pooler.enabled | bool | `true` |  |
 | cnpg.pooler.instances | int | `2` |  |
 | cnpg.pooler.monitoring.additionalLabels.release | string | `"victoria-metrics-k8s-stack"` |  |
-| cnpg.pooler.monitoring.enabled | bool | `true` |  |
+| cnpg.pooler.monitoring.enabled | bool | `false` |  |
 | cnpg.pooler.parameters.default_pool_size | string | `"50"` | Pool size. Default was 25 |
 | cnpg.pooler.parameters.max_client_conn | string | `"1000"` | Max client connections, default was 1000 |
 | cnpg.pooler.parameters.reserve_pool_size | string | `"25"` | Reservice pool size, default was 0/disabled |
