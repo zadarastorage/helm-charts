@@ -1,7 +1,7 @@
 # -- Override Release Name
 nameOverride: ""
 # -- Default version tag for container images
-version_tag: v0.18.0-beta.2
+version_tag: v0.18.0
 
 images:
   backend:
