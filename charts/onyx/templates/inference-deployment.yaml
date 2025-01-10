@@ -9,6 +9,9 @@ metadata:
 spec:
   replicas: {{ default "1" .Values.inference.replicaCount }}
   revisionHistoryLimit: {{ default "2" .Values.inference.revisionHistoryLimit }}
+  {{- if or .Values.inference.updateStrategy.type .Values.inference.updateStrategy.rollingUpdate }}
+  strategy: {{ .Values.inference.updateStrategy | toYaml | nindent 4 }}
+  {{- end }}
   selector:
     matchLabels:
       app: {{ default $.Release.Name $.Values.nameOverride }}

@@ -1,6 +1,8 @@
 apiVersion: v2
 name: onyx
-version: 0.0.4
+version: 0.0.5
+description: Gen-AI Chat for Teams - Think ChatGPT if it had access to your team's unique knowledge.
+homepage: https://www.onyx.app/
 dependencies:
   - name: redis
     version: 20.1.7
