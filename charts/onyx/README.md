@@ -1,6 +1,6 @@
 # onyx
 
-![Version: 0.0.3](https://img.shields.io/badge/Version-0.0.3-informational?style=flat-square)
+![Version: 0.0.4](https://img.shields.io/badge/Version-0.0.4-informational?style=flat-square)
 
 ## Requirements
 
@@ -87,7 +87,7 @@
 | redis.enabled | bool | `true` |  |
 | redis.master.resourcesPreset | string | `"medium"` |  |
 | redis.master.revisionHistoryLimit | int | `2` |  |
-| version_tag | string | `"v0.18.0-beta.2"` | Default version tag for container images |
+| version_tag | string | `"v0.18.0"` | Default version tag for container images |
 | vespa.configMap.env.VESPA_CONFIGPROXY_JVMARGS | string | `"-Xms128M -Xmx1G"` |  |
 | vespa.configMap.env.VESPA_CONFIGSERVER_JVMARGS | string | `"-Xms128M -Xmx1G"` |  |
 | vespa.nameOverride | string | `"vespa"` |  |
