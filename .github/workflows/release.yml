@@ -30,6 +30,7 @@ jobs:
         uses: losisin/helm-docs-github-action@v1
         with:
           git-push: true
+          template-files: './_templates.gotmpl,README.md.gotmpl'
 
       - name: Run chart-releaser
         id: releaser
