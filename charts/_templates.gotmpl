@@ -1,0 +1,27 @@
+{{ define "repository.name" -}}
+zadara
+{{- end }}
+
+{{ define "repository.url" -}}
+https://zadarastorage.github.io/helm-charts
+{{- end }}
+
+{{ define "helm.setup-system" -}}
+## Install
+
+```
+helm repo add {{ template "repository.name" . }} {{ template "repository.url" . }}
+helm repo update {{ template "repository.name" . }}
+helm install {{ template "chart.name" . }} {{ template "repository.name" . }}/{{ template "chart.name" . }} -n kube-system
+```
+{{- end }}
+
+{{ define "helm.setup-app" -}}
+## Install
+
+```
+helm repo add {{ template "repository.name" . }} {{ template "repository.url" . }}
+helm repo update {{ template "repository.name" . }}
+helm install {{ template "chart.name" . }} {{ template "repository.name" . }}/{{ template "chart.name" . }} --create-namespace -n {{ .Name }}
+```
+{{- end }}
