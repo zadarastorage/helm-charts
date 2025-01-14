@@ -39,7 +39,7 @@ spec:
                 - web-server
             topologyKey: "kubernetes.io/hostname"
       containers:
-        - image: {{ .Values.images.web.repository }}:{{ default .Values.version_tag .Values.images.web.tag }}
+        - image: {{ .Values.images.web.repository }}:{{ default .Chart.AppVersion .Values.images.web.tag }}
           name: web-server
           ports:
             - name: 'http'

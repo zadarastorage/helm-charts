@@ -40,7 +40,7 @@ spec:
                 - api-server
             topologyKey: "kubernetes.io/hostname"
       containers:
-        - image: {{ .Values.images.backend.repository }}:{{ default .Values.version_tag .Values.images.backend.tag }}
+        - image: {{ .Values.images.backend.repository }}:{{ default .Chart.AppVersion .Values.images.backend.tag }}
           name: api-server
           command: ["/usr/bin/bash", "/hotpatch/entrypoint.sh"]
           args:
