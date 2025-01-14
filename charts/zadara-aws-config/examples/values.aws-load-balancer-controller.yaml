@@ -1,0 +1,20 @@
+# values.aws-load-balancer-controller.yaml
+clusterName: #USER_SUPPLIED_CLUSTER_NAME#
+controllerConfig:
+  featureGates:
+    ALBSingleSubnet: true
+    SubnetsClusterTagCheck: false
+ingressClassConfig:
+  default: true
+enableShield: false
+enableWaf: false
+enableWafv2: false
+awsApiEndpoints: "ec2=https://cloud.zadara.com/api/v2/aws/ec2,elasticloadbalancing=https://cloud.zadara.com/api/v2/aws/elbv2,acm=https://cloud.zadara.com/api/v2/aws/acm,sts=https://cloud.zadara.com/api/v2/aws/sts"
+# In some edge cases, cloud.zadara.com may need to be changed for your particular site.
+tolerations:
+  - key: ""
+    effect: NoSchedule
+    operator: Exists
+  - key: ""
+    effect: NoExecute
+    operator: Exists

@@ -1,0 +1,32 @@
+# values.aws-ebs-csi-driver.yaml
+controller:
+  region: us-east-1
+sidecars:
+  provisioner:
+    additionalArgs:
+      - --extra-create-metadata
+      - --timeout=120s
+      - --retry-interval-start=10s
+  attacher:
+    additionalArgs:
+      - --timeout=120s
+      - --retry-interval-start=10s
+storageClasses:
+  - name: gp3
+    volumeBindingMode: WaitForFirstConsumer
+    allowVolumeExpansion: true
+    parameters:
+      type: gp3
+      tagSpecification_1: "Name={{ .PVName }}"
+    mountOptions:
+      - errors=panic
+    annotations:
+      storageclass.kubernetes.io/is-default-class: true
+volumeSnapshotClasses:
+  - name: gp3
+    deletionPolicy: Delete
+    parameters:
+      type: gp3
+      tagSpecification_1: "Name={{ .PVName }}"
+    annotations:
+      storageclass.kubernetes.io/is-default-class: true

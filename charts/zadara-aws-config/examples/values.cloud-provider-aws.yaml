@@ -1,0 +1,23 @@
+# values.cloud-provider-aws.yaml
+args:
+  - --v=2
+  - --cloud-provider=aws
+  - --allocate-node-cidrs=false
+  - --configure-cloud-routes=false
+  - --cloud-config=/zadara/cloud.conf
+nodeSelector:
+  node-role.kubernetes.io/control-plane: "true"
+tolerations:
+  - key: ""
+    effect: NoSchedule
+    operator: Exists
+  - key: ""
+    effect: NoExecute
+    operator: Exists
+extraVolumes:
+  - name: "cloud-config"
+    configMap:
+      name: cloud-config
+extraVolumeMounts:
+  - name: cloud-config
+    mountPath: /zadara

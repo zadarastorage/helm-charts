@@ -1,0 +1,21 @@
+# values.cluster-autoscaler.yaml
+awsRegion: us-east-1
+autoDiscovery:
+  clusterName: #USER_SUPPLIED_CLUSTER_NAME#
+cloudConfigPath: /zadara/cloud.conf
+nodeSelector:
+  node-role.kubernetes.io/control-plane: "true"
+tolerations:
+  - key: ""
+    effect: NoSchedule
+    operator: Exists
+  - key: ""
+    effect: NoExecute
+    operator: Exists
+extraVolumes:
+  - name: "cloud-config"
+    configMap:
+      name: cloud-config
+extraVolumeMounts:
+  - name: cloud-config
+    mountPath: /zadara

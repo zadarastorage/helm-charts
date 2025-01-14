@@ -1,0 +1,81 @@
+{{ template "chart.header" . }}
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.badgesSection" . }}
+
+{{ template "chart.description" . }}
+
+{{ template "chart.homepageLine" . }}
+
+## Summary
+
+This chart creates necessary `aws-meta` and `cloud-config` ConfigMap objects configured to point to a local zCompute Cloud Console. This is meant for use with charts that take advantage of AWS APIs. Those charts may require additional configuraiton to be enabled.
+
+{{ template "helm.setup-system" . }}
+
+## Usage
+
+Instructions below assume the {{ template "chart.name" . }} chart has already been installed to kube-system.
+
+### aws-cloud-controller-manager
+
+`aws-cloud-controller-manager` version `0.0.8` is tested to be compatible at this time.
+
+```
+wget https://raw.githubusercontent.com/zadarastorage/helm-charts/refs/heads/main/charts/zadara-aws-config/examples/values.cloud-provider-aws.yaml
+helm repo add cloud-provider-aws https://kubernetes.github.io/cloud-provider-aws
+helm repo update cloud-provider-aws
+helm repo install --version 0.0.8 -f values.cloud-provider-aws.yaml cloud-provider-aws/aws-cloud-controller-manager -n kube-system
+```
+
+### aws-ebs-csi-driver
+
+`aws-ebs-csi-driver` version `2.35.0` is tested to be compatible at this time.
+
+```
+wget https://raw.githubusercontent.com/zadarastorage/helm-charts/refs/heads/main/charts/zadara-aws-config/examples/values.aws-ebs-csi-driver.yaml
+helm repo add aws-ebs-csi-driver https://kubernetes-sigs.github.io/aws-ebs-csi-driver
+helm repo update aws-ebs-csi-driver
+helm repo install --version 2.35.0 -f values.aws-ebs-csi-driver.yaml aws-ebs-csi-driver/aws-ebs-csi-driver -n kube-system
+```
+
+### cluster-autoscaler
+
+`cluster-autoscaler` version `9.38.0` is tested to be compatible at this time.
+
+> [!CAUTION]
+> Be sure to replace `#USER_SUPPLIED_CLUSTER_NAME#` with your desired cluster name in the values file.
+
+```
+wget https://raw.githubusercontent.com/zadarastorage/helm-charts/refs/heads/main/charts/zadara-aws-config/examples/values.cluster-autoscaler.yaml
+helm repo add autoscaler https://kubernetes.github.io/autoscaler
+helm repo update autoscaler
+helm repo install --version 9.38.0 -f values.cluster-autoscaler.yaml autoscaler/cluster-autoscaler -n kube-system
+```
+
+### aws-load-balancer-controller
+
+`aws-load-balancer-controller` version `1.7.2` is tested to be compatible at this time.
+
+> [!CAUTION]
+> Be sure to replace `#USER_SUPPLIED_CLUSTER_NAME#` with your desired cluster name in the values file.
+
+> [!WARNING]
+> `aws-load-balancer-controller` does not leverage `aws-meta` or `cloud-config` ConfigMaps.
+
+```
+wget https://raw.githubusercontent.com/zadarastorage/helm-charts/refs/heads/main/charts/zadara-aws-config/examples/values.aws-load-balancer-controller.yaml
+helm repo add eks-charts https://aws.github.io/eks-charts
+helm repo update eks-charts
+helm repo install --version 1.7.2 -f values.aws-load-balancer-controller.yaml eks-charts/aws-load-balancer-controller -n kube-system
+```
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+{{ template "chart.requirementsSection" . }}
+
+{{ template "chart.valuesSection" . }}
+
+{{ template "helm-docs.versionFooter" . }}
