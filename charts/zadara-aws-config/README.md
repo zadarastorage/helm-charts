@@ -4,6 +4,10 @@
 
 ![Version: 0.0.1](https://img.shields.io/badge/Version-0.0.1-informational?style=flat-square)
 
+Adds ConfigMaps to adapt Kubernetes services from AWS endpoints to use zCompute endpoints
+
+**Homepage:** <https://github.com/zadarastorage/helm-charts/tree/main/charts/zadara-aws-config>
+
 ## Summary
 
 This chart creates necessary `aws-meta` and `cloud-config` ConfigMap objects configured to point to a local zCompute Cloud Console. This is meant for use with charts that take advantage of AWS APIs. Those charts may require additional configuraiton to be enabled.
@@ -72,6 +76,16 @@ helm repo add eks-charts https://aws.github.io/eks-charts
 helm repo update eks-charts
 helm repo install --version 1.7.2 -f values.aws-load-balancer-controller.yaml eks-charts/aws-load-balancer-controller -n kube-system
 ```
+
+## Maintainers
+
+| Name | Email | Url |
+| ---- | ------ | --- |
+| eric-zadara |  | <https://github.com/eric-zadara> |
+
+## Source Code
+
+* <https://github.com/zadarastorage/helm-charts/tree/main/charts/zadara-aws-config>
 
 ## Values
 
