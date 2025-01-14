@@ -31,7 +31,7 @@ jobs:
         with:
           git-push: true
           chart-search-root: charts/
-          template-files: './_templates.gotmpl,README.md.gotmpl'
+          template-files: './_templates.gotmpl,_templates.gotmpl,README.md.gotmpl'
 
       - name: Run chart-releaser
         id: releaser
