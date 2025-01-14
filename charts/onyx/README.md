@@ -1,8 +1,18 @@
+
+
 # onyx
 
 ![Version: 0.0.5](https://img.shields.io/badge/Version-0.0.5-informational?style=flat-square)
 
 Gen-AI Chat for Teams - Think ChatGPT if it had access to your team's unique knowledge.
+
+## Install
+
+```
+helm repo add zadara https://zadarastorage.github.io/helm-charts
+helm repo update zadara
+helm install onyx zadara/onyx --create-namespace -n onyx
+```
 
 ## Requirements
 
