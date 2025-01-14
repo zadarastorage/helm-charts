@@ -10,11 +10,13 @@ endpointUrl: "https://cloud.zadara.com"
 # -- cloud.conf `[Global]` stanza
 global: {}
 
-# -- Definition for all ServiceOverrides and their attributes, overrides any defaults from above
 serviceOverrides:
+  # -- ec2-specific configurations, overrides anything from `default`
   ec2:
     Url: "{{ .Values.endpointUrl }}/api/v2/aws/ec2"
+  # -- autoscaling-specific configurations, overrides anything from `default`
   autoscaling:
     Url: "{{ .Values.endpointUrl }}/api/v2/aws/autoscaling"
+  # -- elasticloadbalancing-specific configurations, overrides anything from `default`
   elasticloadbalancing:
     Url: "{{ .Values.endpointUrl }}/api/v2/aws/elbv2"
