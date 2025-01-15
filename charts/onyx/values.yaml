@@ -2,35 +2,45 @@
 nameOverride: ""
 
 images:
+  # -- Docker image used for both backend API and worker pods
   backend:
     repository: 'onyxdotapp/onyx-backend'
+  # -- Docker image used for frontend web pod
+  # @section -- Frontend web
   web:
     repository: 'onyxdotapp/onyx-web-server'
+  # -- Docker image used for the indexing and embedding model server
+  # @section -- Embedding and Indexing
   model:
     repository: 'onyxdotapp/onyx-model-server'
 
 configMap:
-  # -- ConfigMap for auth env vars
   auth:
+    # -- Auth mode to operate in [disabled | google_oauth | basic]. https://docs.onyx.app/configuration_guide#auth-type
+    # @section -- Auth
     AUTH_TYPE: disabled
-    DANSWER_BOT_SLACK_APP_TOKEN: ''
-    DANSWER_BOT_SLACK_BOT_TOKEN: ''
+    # -- Client ID for Google OAuth authentication. https://docs.onyx.app/configuration_guide#google-oauth-client-id
+    # @section -- Auth
     GOOGLE_OAUTH_CLIENT_ID: ''
+    # -- Client Secret for Google OAuth authentication. https://docs.onyx.app/configuration_guide#google-oauth-client-secret
+    # @section -- Auth
     GOOGLE_OAUTH_CLIENT_SECRET: ''
-  # -- ConfigMap for vespa configuration env vars
   vespa:
     # -- Set to name of vespa "config" statefulset
+    # @section -- Vespa-ai Embedding Database
     VESPA_CONFIG_SERVER_HOST: "vespa-single"
+    # -- Default vespa configuration port
     VESPA_TENANT_PORT: "19071"
     # -- Set to name of vespa "content" statefulset
+    # @section -- Vespa-ai Embedding Database
     VESPA_HOST: "vespa-single"
+    # -- Default vespa content port
     VESPA_PORT: "8081"
 
   # -- ConfigMap for env vars for all onyx pods
   global: {}
-  # -- ConfigMap for env vars specific to "api" pod(s)
-  api: {}
   # -- ConfigMap for env vars specific to "web" pod(s)
+  # @section -- Frontend web
   web:
     WEB_DOMAIN: http://localhost:3000
     SESSION_EXPIRE_TIME_SECONDS: "86400"
@@ -38,56 +48,84 @@ configMap:
     DISABLE_LLM_CHUNK_FILTER: 'True'
     DISABLE_LLM_QUERY_REPHRASE: 'True'
     QA_TIMEOUT: '120'
+  # -- ConfigMap for env vars specific to "api" pod(s)
+  # @section -- Backend api/worker
+  api: {}
   # -- ConfigMap for env vars specific to "worker" pod(s)
+  # @section -- Backend api/worker
   worker:
     CELERY_WORKER_LIGHT_CONCURRENCY: '32' # Default is 24
     CELERY_WORKER_LIGHT_PREFETCH_MULTIPLIER: '10' # Default is 8
 
   # -- Common ConfigMap to both index and inference pods
+  # @section -- Embedding and Indexing
   ml:
     LOG_LEVEL: info
     MIN_THREADS_ML_MODELS: "10"
 
   # -- ConfigMap for env vars specific to "index" pod(s)
+  # @section -- Embedding and Indexing
   index:
     VESPA_SEARCHER_THREADS: "4"
     NUM_INDEXING_WORKERS: "2"
   # -- ConfigMap for env vars specific to "inference" pod(s)
+  # @section -- Embedding and Indexing
   inference: {}
 
 hotpatch:
+  # -- Enables the hotpatching logic. Primarily used to augment vespa configurations and adjust some connector configurations
+  # @section -- Onyx hotpatches
   enabled: true
+  # -- Configure how many copies of each embedding should be stored within Vespa
+  # @section -- Onyx hotpatches
   vespaRedundancy: 1 # Prefer 2
 
 ingress:
   # -- Enable ingress
+  # @section -- Ingress configuration
   enabled: false
+  # -- Set name of ingress controller
+  # @section -- Ingress configuration
   ingressClassName: traefik
+  # -- Optional addition annotations for the ingress configuration
+  # @section -- Ingress configuration
   annotations: {}
     # cert-manager.io/cluster-issuer: selfsigned
   # -- Set ingress domain name. Optional(If not specified, creates catch all with https disabled)
+  # @section -- Ingress configuration
   hostname: ""
   # -- Enable TLS
+  # @section -- Ingress configuration
   tls: false
 
-# Core services
 web:
   # -- Set number of web replicas
+  # @section -- Frontend web
   replicaCount: 1 # Prefer 2
   updateStrategy:
     type: "RollingUpdate"
   resources:
+    # -- Resource limits for web pods
+    # @section -- Resources
     limits: {}
+    # -- Resource requests for web pods
+    # @section -- Resources
     requests:
       cpu: "0.1"
       memory: "512Mi"
+
 api:
   # -- Set number of api replicas
+  # @section -- Backend api
   replicaCount: 1
   updateStrategy:
     type: "RollingUpdate"
   resources:
+    # -- Resource limits for API pods
+    # @section -- Resources
     limits: {}
+    # -- Resource requests for API pods
+    # @section -- Resources
     requests:
       cpu: "0.1"
       memory: "1Gi"
@@ -95,26 +133,35 @@ api:
 worker:
   # -- Set number of background worker pods.
   # Currently breaks when > 1.
+  # @section -- Backend worker
   replicaCount: 1 # TODO Identify upstream why workers break when scaled up
   updateStrategy:
     type: "Recreate"
   resources:
+    # -- Resource limits for worker pods
+    # @section -- Resources
     limits: {}
+    # -- Resource requests for worker pods
+    # @section -- Resources
     requests:
       cpu: "2"
       memory: "4Gi"
 
-# Core model services
 inference:
   # -- Set number of inference pods.
   # Untested >1
+  # @section -- Embedding and Indexing
   replicaCount: 1
   updateStrategy:
     type: "Recreate"
   runtimeClassName: nvidia
   resources:
+    # -- Resource limits for inference pods
+    # @section -- Resources
     limits:
       nvidia.com/gpu: "4"
+    # -- Resource requests for inference pods
+    # @section -- Resources
     requests:
       cpu: "0.1"
       memory: "2Gi"
@@ -128,13 +175,18 @@ inference:
 index:
   # -- Set number of inference pods.
   # Untested >1
+  # @section -- Embedding and Indexing
   replicaCount: 1
   updateStrategy:
     type: "Recreate"
   runtimeClassName: nvidia
   resources:
+    # -- Resource limits for index pods
+    # @section -- Resources
     limits:
       nvidia.com/gpu: "4"
+    # -- Resource requests for index pods
+    # @section -- Resources
     requests:
       cpu: "0.1"
       memory: "2Gi"
@@ -145,16 +197,23 @@ index:
     - { effect: "NoSchedule", operator: "Exists", key: "nvidia.com/gpu" }
   affinity: {}
 
-# Vespa
 vespa:
+  # -- Override the resource prefix used
+  # @section -- Vespa-ai Embedding Database
   nameOverride: "vespa"
   configMap:
     env:
+      # -- JVMARGS env var for Vespa config servers
+      # @section -- Vespa-ai Embedding Database
       VESPA_CONFIGSERVER_JVMARGS: "-Xms128M -Xmx1G"
+      # -- JVMARGS env var for Vespa config servers
+      # @section -- Vespa-ai Embedding Database
       VESPA_CONFIGPROXY_JVMARGS: "-Xms128M -Xmx1G"
 
   statefulSets:
     single:
+      # -- Enable preconfigured statefulSet "single"
+      # @section -- Vespa-ai Embedding Database
       enabled: true
       volumes:
         var:
@@ -162,6 +221,8 @@ vespa:
           size: 50Gi
           className: gp3
           accessModes: ["ReadWriteOnce"]
+      # -- Resource configuration for a single-replica statefulset
+      # @section -- Vespa-ai Embedding Database
       resources:
         limits:
           cpu: "5"
@@ -170,6 +231,8 @@ vespa:
           cpu: "3"
           memory: "10Gi"
     cfg:
+      # -- Enable preconfigured statefulSet "cfg"
+      # @section -- Vespa-ai Embedding Database
       enabled: false
       replicaCount: 3
       volumes:
@@ -178,6 +241,8 @@ vespa:
           size: 20Gi
           className: gp3
           accessModes: ["ReadWriteOnce"]
+      # -- Resource configuration for "cfg" statefulset
+      # @section -- Vespa-ai Embedding Database
       resources:
         limits:
           cpu: "5"
@@ -186,6 +251,8 @@ vespa:
           cpu: "3"
           memory: "8Gi"
     content:
+      # -- Enable preconfigured statefulSet "content"
+      # @section -- Vespa-ai Embedding Database
       enabled: false
       replicaCount: 3
       ports:
@@ -195,6 +262,8 @@ vespa:
           path: '/opt/vespa/var'
           size: 60Gi
           className: gp3
+      # -- Resource configuration for "cfg" statefulset
+      # @section -- Vespa-ai Embedding Database
       resources:
         limits:
           cpu: "10"
@@ -204,12 +273,14 @@ vespa:
           memory: "10Gi"
 
 cnpg:
+  # -- Enable preconfigured cloudnative-pg psql configuration
   enabled: true
   type: postgresql
   mode: standalone
   backups:
     enabled: false
   cluster:
+    # -- Number of psql replicas. 1 is master, N-1 are replica
     instances: 3
     affinity:
       topologyKey: kubernetes.io/hostname
@@ -224,6 +295,7 @@ cnpg:
         release: victoria-metrics-k8s-stack
   pooler:
     enabled: true
+    # -- Number of psql poolers
     instances: 2
     parameters:
       # -- Pool size. Default was 25
@@ -238,6 +310,7 @@ cnpg:
         release: victoria-metrics-k8s-stack
 
 redis:
+  # -- Enable preconfigured redis configuration
   enabled: true
   architecture: standalone # TODO Couldn't get sentinel to work
   master:

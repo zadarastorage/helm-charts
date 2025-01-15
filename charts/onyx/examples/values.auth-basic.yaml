@@ -1,0 +1,40 @@
+# values.auth-basic.yaml
+configMap:
+  auth:
+    AUTH_TYPE: basic
+
+ingress:
+  enabled: true
+  annotations:
+    cert-manager.io/cluster-issuer: selfsigned
+  tls: true
+  hostname: "onyx.#USER_SUPPLIED_ROOT_DOMAIN#"
+
+inference:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+            - key: nvidia.com/device-plugin.config
+              operator: In
+              values:
+                - tesla-25b6
+                - tesla-2235
+                - tesla-27b8
+                - tesla-26b9
+
+index:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+            - key: nvidia.com/device-plugin.config
+              operator: In
+              values:
+                - tesla-25b6
+                - tesla-2235
+                - tesla-27b8
+                - tesla-26b9
+
