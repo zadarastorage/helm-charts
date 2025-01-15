@@ -11,9 +11,9 @@
 
 | State | Chart | Repository | Description |
 | ----- | ----- | ---------- | ----------- |
-| Required by default | (cloudnative-pg)[https://github.com/cloudnative-pg/charts?tab=readme-ov-file#operator-chart] | https://cloudnative-pg.io/charts/ | This operator is used to manage the Postgresql deployment and ensure redundancy to the database. </ br>It can be disabled, but another solution would need to be configured. |
+| Required by default | [cloudnative-pg](https://github.com/cloudnative-pg/charts?tab=readme-ov-file#operator-chart) | https://cloudnative-pg.io/charts/ | This operator is used to manage the Postgresql deployment and ensure redundancy to the database. <br>It can be disabled, but another solution would need to be configured. |
 | Optional/Recommended | ollama | https://otwld.github.io/ollama-helm/ | Onyx supports multiple LLM solutions, we're recommending Ollama by default. |
-| Optional/Recommended | (gpu-operator)[https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/getting-started.html#procedure] | https://helm.ngc.nvidia.com/nvidia | This is necessary priot to installing ollama to the cluster. |
+| Optional/Recommended | [gpu-operator](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/getting-started.html#procedure) | https://helm.ngc.nvidia.com/nvidia | This is necessary priot to installing ollama to the cluster. |
 
 {{ template "helm.setup-app" . }}
 
@@ -27,8 +27,8 @@
 
 ## Values tl;dr
 
-Values examples can be found in the [examples/](https://github.com/zadarastorage/helm-charts/tree/main/charts/onyx/examples) folder.
-This chart favors single-replicas for all configurations except for the Postgresql Database by default, the [values.ha.yaml](https://github.com/zadarastorage/helm-charts/tree/main/charts/onyx/examples/values.ha.yaml) example shows the minimum configuration needed to scale up all compatible pods.
+Values examples can be found in the [examples/](https://github.com/zadarastorage/helm-charts/tree/main/charts/onyx/examples) folder.<br>
+This chart favors single-replicas for all configurations except for the Postgresql Database by default, the [values.ha.yaml](https://github.com/zadarastorage/helm-charts/tree/main/charts/onyx/examples/values.ha.yaml) example shows the minimum configuration needed to scale up all compatible pods.<br>
 Some services do not play nice when scaled past 1 replica, they are noted in the full values documentation below.
 
 {{ template "chart.valuesSection" . }}
