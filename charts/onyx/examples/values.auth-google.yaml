@@ -1,6 +1,8 @@
 # values.auth-basic.yaml
 configMap:
   auth:
+    # Follow this guide for information on obtaining these values from Google
+    # https://docs.onyx.app/google_oauth_setup
     AUTH_TYPE: google_oauth
     GOOGLE_OAUTH_CLIENT_ID: '#USER_SUPPLIED#'
     GOOGLE_OAUTH_CLIENT_SECRET: '#USER_SUPPLIED'
