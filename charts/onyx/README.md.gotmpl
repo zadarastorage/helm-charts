@@ -13,7 +13,7 @@
 | ----- | ----- | ---------- | ----------- |
 | Required by default | [cloudnative-pg](https://github.com/cloudnative-pg/charts?tab=readme-ov-file#operator-chart) | https://cloudnative-pg.io/charts/ | This operator is used to manage the Postgresql deployment and ensure redundancy to the database. <br>It can be disabled, but another solution would need to be configured. |
 | Optional/Recommended | ollama | https://otwld.github.io/ollama-helm/ | Onyx supports multiple LLM solutions, we're recommending Ollama by default. |
-| Optional/Recommended | [gpu-operator](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/getting-started.html#procedure) | https://helm.ngc.nvidia.com/nvidia | This is necessary priot to installing ollama to the cluster. |
+| Optional/Recommended | [gpu-operator](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/getting-started.html#procedure) | https://helm.ngc.nvidia.com/nvidia | This is necessary prior to installing ollama to the cluster. |
 
 {{ template "helm.setup-app" . }}
 
