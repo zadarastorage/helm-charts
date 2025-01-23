@@ -16,6 +16,8 @@ Gen-AI Chat for Teams - Think ChatGPT if it had access to your team's unique kno
 | Optional/Recommended | ollama | https://otwld.github.io/ollama-helm/ | Onyx supports multiple LLM solutions, we're recommending Ollama by default. |
 | Optional/Recommended | [gpu-operator](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/getting-started.html#procedure) | https://helm.ngc.nvidia.com/nvidia | This is necessary prior to installing ollama to the cluster. |
 
+[Prerequisite Installation Reference](docs/prerequisites.md)
+
 ## Install
 
 ```
