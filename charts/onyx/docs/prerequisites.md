@@ -92,6 +92,8 @@ helm install gpu-operator nvidia/gpu-operator --create-namespace -n gpu-operator
 
 ### GPU Node notes
 
+The operator detects the presence of a GPU on a given node, and only attempts driver installation in that case. So no need to block the driver on non-GPU nodes.
+
 The driver container images can be found at https://catalog.ngc.nvidia.com/orgs/nvidia/containers/driver/tags to determine compatible operating systems.
 
 Automated driver installation can be prevented on a per-node basis by labeling the GPU node with the following:
@@ -100,7 +102,12 @@ kubectl label nodes $NODE nvidia.com/gpu.deploy.driver=false
 ```
 [Reference](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/getting-started.html#preventing-installation-of-nvidia-gpu-driver-on-some-nodes)
 
-The operator detects the presence of a GPU on a given node, and only attempts driver installation in that case. So no need to block the driver on non-GPU nodes.
+GPU Nodes should be configured to come online with the following taint
+```
+nvidia.com/gpu: "true:NoSchedule"
+```
+
+Further labels/taints may be necessary for Cluster Autoscaler to manage related ASGs properly, this would include some tags on the ASG describing the available GPU resources.
 
 ## ollama-helm
 
