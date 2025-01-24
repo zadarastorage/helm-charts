@@ -47,10 +47,11 @@ data:
     cp /hotpatch/services.xml ${prefix}/document_index/vespa/app_config/services.xml
 
     for x in 'configs/app_configs.py' 'connectors/web/connector.py' 'connectors/zendesk/connector.py' 'document_index/vespa/index.py'; do
-      echo "== Modifying ${prefix}/${x}"
+      echo "== Evaluating ${prefix}/${x}"
       md5sum ${prefix}/${x}
       WEB_CONNECTOR=$(md5sum ${prefix}/${x} | cut -d ' ' -f1)
       if [[ -e /hotpatch/${WEB_CONNECTOR}.patch ]]; then
+        echo "== Patching ${prefix}/${x}"
         patch -p1 -u ${prefix}/${x} -i /hotpatch/${WEB_CONNECTOR}.patch
         md5sum ${prefix}/${x}
       fi
