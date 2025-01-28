@@ -18,7 +18,7 @@ configMap:
   auth:
     # -- Auth mode to operate in [disabled | google_oauth | basic]. https://docs.onyx.app/configuration_guide#auth-type
     # @section -- Auth
-    AUTH_TYPE: disabled
+    AUTH_TYPE: basic
     # -- Client ID for Google OAuth authentication. https://docs.onyx.app/configuration_guide#google-oauth-client-id
     # @section -- Auth
     GOOGLE_OAUTH_CLIENT_ID: ''
