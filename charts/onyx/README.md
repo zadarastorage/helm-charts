@@ -2,7 +2,7 @@
 
 # onyx
 
-![Version: 0.0.7](https://img.shields.io/badge/Version-0.0.7-informational?style=flat-square) ![AppVersion: v0.19.0](https://img.shields.io/badge/AppVersion-v0.19.0-informational?style=flat-square)
+![Version: 0.0.8](https://img.shields.io/badge/Version-0.0.8-informational?style=flat-square) ![AppVersion: v0.19.0](https://img.shields.io/badge/AppVersion-v0.19.0-informational?style=flat-square)
 
 Gen-AI Chat for Teams - Think ChatGPT if it had access to your team's unique knowledge.
 
@@ -85,7 +85,7 @@ Some services do not play nice when scaled past 1 replica, they are noted in the
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| configMap.auth.AUTH_TYPE | string | `"disabled"` | Auth mode to operate in [disabled | google_oauth | basic]. https://docs.onyx.app/configuration_guide#auth-type |
+| configMap.auth.AUTH_TYPE | string | `"basic"` | Auth mode to operate in [disabled | google_oauth | basic]. https://docs.onyx.app/configuration_guide#auth-type |
 | configMap.auth.GOOGLE_OAUTH_CLIENT_ID | string | `""` | Client ID for Google OAuth authentication. https://docs.onyx.app/configuration_guide#google-oauth-client-id |
 | configMap.auth.GOOGLE_OAUTH_CLIENT_SECRET | string | `""` | Client Secret for Google OAuth authentication. https://docs.onyx.app/configuration_guide#google-oauth-client-secret |
 
