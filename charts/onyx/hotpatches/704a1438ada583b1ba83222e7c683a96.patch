@@ -1,0 +1,31 @@
+# /app/onyx/document_index/vespa/index.py v0.21.1
+diff --git a/app/onyx/document_index/vespa/index.py b/app/onyx/document_index/vespa/index.py
+index 6dec872..71cc8b0 100644
+--- a/app/onyx/document_index/vespa/index.py
++++ b/app/onyx/document_index/vespa/index.py
+@@ -179,6 +179,7 @@ class VespaIndex(DocumentIndex):
+         )
+         schema_file = os.path.join(vespa_schema_path, "schemas", "danswer_chunk.sd")
+         services_file = os.path.join(vespa_schema_path, "services.xml")
++        hosts_file = os.path.join(vespa_schema_path, "hosts.xml")
+         overrides_file = os.path.join(vespa_schema_path, "validation-overrides.xml")
+ 
+         with open(services_file, "r") as services_f:
+@@ -203,6 +204,9 @@ class VespaIndex(DocumentIndex):
+         with open(overrides_file, "r") as overrides_f:
+             overrides_template = overrides_f.read()
+ 
++        with open(hosts_file, "r") as hosts_f:
++            hosts_payload = hosts_f.read()
++
+         # Vespa requires an override to erase data including the indices we're no longer using
+         # It also has a 30 day cap from current so we set it to 7 dynamically
+         now = datetime.now()
+@@ -213,6 +217,7 @@ class VespaIndex(DocumentIndex):
+ 
+         zip_dict = {
+             "services.xml": services.encode("utf-8"),
++            "hosts.xml": hosts_payload.encode("utf-8"),
+             "validation-overrides.xml": overrides.encode("utf-8"),
+         }
+ 
