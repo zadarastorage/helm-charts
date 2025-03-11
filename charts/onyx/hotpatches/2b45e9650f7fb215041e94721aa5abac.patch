@@ -1,0 +1,17 @@
+# /app/onyx/configs/app_configs.py v0.23.1
+diff --git a/app/onyx/configs/app_configs.py b/app/onyx/configs/app_configs.py
+index 1a4d11c..535e97c 100644
+--- a/app/onyx/configs/app_configs.py
++++ b/app/onyx/configs/app_configs.py
+@@ -436,6 +436,11 @@ ZENDESK_CONNECTOR_SKIP_ARTICLE_LABELS = os.environ.get(
+     "ZENDESK_CONNECTOR_SKIP_ARTICLE_LABELS", ""
+ ).split(",")
+ 
++# comma delimited list of zendesk ticket tags to skip indexing for
++ZENDESK_CONNECTOR_SKIP_TICKET_TAGS = os.environ.get(
++    "ZENDESK_CONNECTOR_SKIP_TICKET_TAGS", ""
++).split(",")
++
+ 
+ #####
+ # Indexing Configs
