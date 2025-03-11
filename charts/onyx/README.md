@@ -2,7 +2,7 @@
 
 # onyx
 
-![Version: 0.0.11](https://img.shields.io/badge/Version-0.0.11-informational?style=flat-square) ![AppVersion: v0.22.1](https://img.shields.io/badge/AppVersion-v0.22.1-informational?style=flat-square)
+![Version: 0.0.12](https://img.shields.io/badge/Version-0.0.12-informational?style=flat-square) ![AppVersion: v0.23.1](https://img.shields.io/badge/AppVersion-v0.23.1-informational?style=flat-square)
 
 Gen-AI Chat for Teams - Think ChatGPT if it had access to your team's unique knowledge.
 
