@@ -2,7 +2,7 @@
 
 # onyx
 
-![Version: 0.0.12](https://img.shields.io/badge/Version-0.0.12-informational?style=flat-square) ![AppVersion: v0.23.1](https://img.shields.io/badge/AppVersion-v0.23.1-informational?style=flat-square)
+![Version: 0.0.13](https://img.shields.io/badge/Version-0.0.13-informational?style=flat-square) ![AppVersion: v0.24.0](https://img.shields.io/badge/AppVersion-v0.24.0-informational?style=flat-square)
 
 Gen-AI Chat for Teams - Think ChatGPT if it had access to your team's unique knowledge.
 
@@ -169,7 +169,7 @@ Some services do not play nice when scaled past 1 replica, they are noted in the
 | cnpg.pooler.parameters.max_client_conn | string | `"1000"` | Max client connections, default was 1000 |
 | cnpg.pooler.parameters.reserve_pool_size | string | `"25"` | Reservice pool size, default was 0/disabled |
 | cnpg.type | string | `"postgresql"` |  |
-| configMap.global | object | `{}` | ConfigMap for env vars for all onyx pods |
+| configMap.global | object | `{"DISABLE_LLM_CHOOSE_SEARCH":"True"}` | ConfigMap for env vars for all onyx pods |
 | configMap.vespa.VESPA_PORT | string | `"8081"` | Default vespa content port |
 | configMap.vespa.VESPA_TENANT_PORT | string | `"19071"` | Default vespa configuration port |
 | images.backend | object | `{"repository":"onyxdotapp/onyx-backend"}` | Docker image used for both backend API and worker pods |
