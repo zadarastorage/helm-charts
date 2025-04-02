@@ -38,7 +38,8 @@ configMap:
     VESPA_PORT: "8081"
 
   # -- ConfigMap for env vars for all onyx pods
-  global: {}
+  global:
+    DISABLE_LLM_CHOOSE_SEARCH: 'True'
   # -- ConfigMap for env vars specific to "web" pod(s)
   # @section -- Frontend web
   web:
