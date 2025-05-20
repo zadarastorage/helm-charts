@@ -1,7 +1,7 @@
 apiVersion: v2
 name: onyx
-version: 0.0.14
-appVersion: "v0.25.0"
+version: 0.0.15
+appVersion: "v0.26.0"
 description: Gen-AI Chat for Teams - Think ChatGPT if it had access to your team's unique knowledge.
 home: https://www.onyx.app/
 sources:
