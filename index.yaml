@@ -2,6 +2,38 @@ apiVersion: v1
 entries:
   onyx:
   - apiVersion: v2
+    appVersion: v0.29.1
+    created: "2025-06-18T20:20:43.528220416Z"
+    dependencies:
+    - condition: redis.enabled
+      name: redis
+      repository: https://charts.bitnami.com/bitnami
+      version: 20.1.7
+    - alias: cnpg
+      condition: cnpg.enabled
+      name: cluster
+      repository: https://cloudnative-pg.github.io/charts
+      version: 0.0.11
+    - alias: vespa
+      condition: vespa.enabled
+      name: vespa-ai
+      repository: https://zadarastorage.github.io/helm-charts
+      version: 0.0.2
+    description: Gen-AI Chat for Teams - Think ChatGPT if it had access to your team's
+      unique knowledge.
+    digest: cadb0de642d9a3b8f8bdf929b486e48110208e4863230e72e7f73878361dc65c
+    home: https://www.onyx.app/
+    maintainers:
+    - name: eric-zadara
+      url: https://github.com/eric-zadara
+    name: onyx
+    sources:
+    - https://github.com/zadarastorage/helm-charts/blob/main/charts/onyx
+    - https://github.com/onyx-dot-app/onyx
+    urls:
+    - https://github.com/zadarastorage/helm-charts/releases/download/onyx-0.0.19/onyx-0.0.19.tgz
+    version: 0.0.19
+  - apiVersion: v2
     appVersion: v0.28.2
     created: "2025-06-18T20:19:06.371612914Z"
     dependencies:
@@ -552,4 +584,4 @@ entries:
     urls:
     - https://github.com/zadarastorage/helm-charts/releases/download/zadara-aws-config-0.0.1/zadara-aws-config-0.0.1.tgz
     version: 0.0.1
-generated: "2025-06-18T20:19:06.371725525Z"
+generated: "2025-06-18T20:20:43.528375235Z"
