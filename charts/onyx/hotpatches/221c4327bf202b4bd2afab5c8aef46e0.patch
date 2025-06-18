@@ -1,0 +1,23 @@
+# /app/onyx/document_index/vespa/index.py v0.28.0
+diff --git a/app/onyx/document_index/vespa/index.py b/app/onyx/document_index/vespa/index.py
+index 46838c4..ead558f 100644
+--- a/app/onyx/document_index/vespa/index.py
++++ b/app/onyx/document_index/vespa/index.py
+@@ -211,6 +211,9 @@ class VespaIndex(DocumentIndex):
+         except Exception:
+             logger.debug("Could not load the reindexing flag. Using ngrams")
+ 
++        with open(hosts_file, "r") as hosts_f:
++            hosts_payload = hosts_f.read()
++
+         # Vespa requires an override to erase data including the indices we're no longer using
+         # It also has a 30 day cap from current so we set it to 7 dynamically
+         with open(overrides_jinja_file, "r") as overrides_f:
+@@ -226,6 +229,7 @@ class VespaIndex(DocumentIndex):
+ 
+         zip_dict = {
+             "services.xml": services.encode("utf-8"),
++            "hosts.xml": hosts_payload.encode("utf-8"),
+             "validation-overrides.xml": overrides.encode("utf-8"),
+         }
+ 
