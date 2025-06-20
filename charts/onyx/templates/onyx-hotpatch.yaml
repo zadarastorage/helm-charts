@@ -45,6 +45,8 @@ data:
     cp /hotpatch/hosts.xml ${prefix}/document_index/vespa/app_config/hosts.xml
     echo "== Replacing ${prefix}/document_index/vespa/app_config/services.xml"
     cp /hotpatch/services.xml ${prefix}/document_index/vespa/app_config/services.xml
+    echo "== Replacing ${prefix}/document_index/vespa/app_config/services.xml.jinja"
+    cp /hotpatch/services.xml.jinja ${prefix}/document_index/vespa/app_config/services.xml.jinja
 
     for x in 'configs/app_configs.py' 'connectors/web/connector.py' 'connectors/zendesk/connector.py' 'document_index/vespa/index.py'; do
       echo "== Evaluating ${prefix}/${x}"
@@ -134,6 +136,79 @@ data:
                         <searchnode>
                             <requestthreads>
                                 <persearch>SEARCH_THREAD_NUMBER</persearch>
+                            </requestthreads>
+                        </searchnode>
+                    </tuning>
+                </proton>
+            </engine>
+            <config name="vespa.config.search.summary.juniperrc">
+                <max_matches>3</max_matches>
+                <length>750</length>
+                <surround_max>350</surround_max>
+                <min_length>300</min_length>
+            </config>
+        </content>
+    </services>
+  services.xml.jinja: |
+    <?xml version="1.0" encoding="utf-8" ?>
+    <services version="1.0">
+        <admin version="2.0">
+            <configservers>
+            {{- range $i, $e := ($configServers | uniq | sortAlpha) }}
+                <configserver hostalias="{{ $e }}" />
+            {{- end }}
+            </configservers>
+            <cluster-controllers>
+            {{- range $i, $e := ($configServers | uniq | sortAlpha) }}
+                <cluster-controller hostalias="{{ $e }}" />
+            {{- end }}
+            </cluster-controllers>
+            <slobroks>
+            {{- range $i, $e := ($configServers | uniq | sortAlpha) }}
+                <slobrok hostalias="{{ $e }}" />
+            {{- end }}
+            </slobroks>
+
+            <adminserver hostalias="{{ $configServers | uniq | sortAlpha | first }}" />
+        </admin>
+        <container id="default" version="1.0">
+            <document-api/>
+            <search/>
+            <http>
+                <server id="default" port="8081"/>
+            </http>
+            <nodes>
+            {{- range $i, $e := ($dataServers | uniq | sortAlpha) }}
+                <node hostalias="{{ $e }}" />
+            {{- end }}
+                <!-- <node hostalias="danswer-node" /> -->
+            </nodes>
+        </container>
+        <content id="danswer_index" version="1.0">
+            <redundancy>{{ default "1" $.Values.hotpatch.vespaRedundancy }}</redundancy>
+            <documents>
+                <!-- <document type="danswer_chunk" mode="index" /> -->
+                {{ `{{` }} document_elements {{ `}}` }}
+            </documents>
+            <nodes>
+            {{- range $i, $e := ($dataServers | uniq | sortAlpha) }}
+                <node hostalias="{{ $e }}" distribution-key={{ $i | quote }} />
+            {{- end }}
+                <!-- <node hostalias="danswer-node" distribution-key="0" /> -->
+            </nodes>
+            <tuning>
+                <resource-limits>
+                    <!-- Default is 75% but this can be increased for Dockerized deployments -->
+                    <!-- https://docs.vespa.ai/en/operations/feed-block.html -->
+                    <disk>0.75</disk>
+                </resource-limits>
+            </tuning>
+            <engine>
+                <proton>
+                    <tuning>
+                        <searchnode>
+                            <requestthreads>
+                                <persearch>{{ `{{` }} num_search_threads {{ `}}` }}</persearch>
                             </requestthreads>
                         </searchnode>
                     </tuning>
