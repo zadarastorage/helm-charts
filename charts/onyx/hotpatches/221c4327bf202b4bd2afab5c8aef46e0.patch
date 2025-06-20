@@ -1,19 +1,24 @@
 # /app/onyx/document_index/vespa/index.py v0.28.0
 diff --git a/app/onyx/document_index/vespa/index.py b/app/onyx/document_index/vespa/index.py
-index 46838c4..ead558f 100644
+index 46838c4..4b46b62 100644
 --- a/app/onyx/document_index/vespa/index.py
 +++ b/app/onyx/document_index/vespa/index.py
-@@ -211,6 +211,9 @@ class VespaIndex(DocumentIndex):
-         except Exception:
-             logger.debug("Could not load the reindexing flag. Using ngrams")
+@@ -188,10 +188,14 @@ class VespaIndex(DocumentIndex):
+             vespa_schema_path, "schemas", VespaIndex.VESPA_SCHEMA_JINJA_FILENAME
+         )
+         services_jinja_file = os.path.join(vespa_schema_path, "services.xml.jinja")
++        hosts_file = os.path.join(vespa_schema_path, "hosts.xml")
+         overrides_jinja_file = os.path.join(
+             vespa_schema_path, "validation-overrides.xml.jinja"
+         )
  
 +        with open(hosts_file, "r") as hosts_f:
 +            hosts_payload = hosts_f.read()
 +
-         # Vespa requires an override to erase data including the indices we're no longer using
-         # It also has a 30 day cap from current so we set it to 7 dynamically
-         with open(overrides_jinja_file, "r") as overrides_f:
-@@ -226,6 +229,7 @@ class VespaIndex(DocumentIndex):
+         with open(services_jinja_file, "r") as services_f:
+             schema_names = [self.index_name, self.secondary_index_name]
+             doc_lines = _create_document_xml_lines(schema_names)
+@@ -226,6 +230,7 @@ class VespaIndex(DocumentIndex):
  
          zip_dict = {
              "services.xml": services.encode("utf-8"),
