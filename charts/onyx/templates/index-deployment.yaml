@@ -20,6 +20,7 @@ spec:
     metadata:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/hotpatch: {{ include (print $.Template.BasePath "/onyx-hotpatch.yaml") . | sha256sum }}
       labels:
         app: {{ default $.Release.Name $.Values.nameOverride }}
         service: index-server
@@ -34,7 +35,11 @@ spec:
       containers:
         - image: {{ .Values.images.model.repository }}:{{ default .Chart.AppVersion .Values.images.model.tag }}
           name: index-server
-          command: ["uvicorn", "model_server.main:app", "--host", "0.0.0.0", "--port", "9000"]
+          command: ["/usr/bin/bash", "/hotpatch/entrypoint.sh"]
+          args:
+            - /bin/sh
+            - -c
+            - uvicorn model_server.main:app --host 0.0.0.0 --port 9000
           ports:
             - name: 'http'
               containerPort: 9000
@@ -64,11 +69,18 @@ spec:
 {{- if .Values.index.resources }}
           resources: {{ toYaml (.Values.index.resources) | nindent 12 }}
 {{- end }}
+          volumeMounts:
+            - name: hotpatch
+              mountPath: /hotpatch
 {{- if .Values.index.extraVolumeMounts }}
-          volumeMounts: {{ toYaml (.Values.index.extraVolumeMounts) | nindent 12 }}
+            {{ toYaml (.Values.index.extraVolumeMounts) | nindent 12 }}
 {{- end }}
+      volumes:
+        - name: hotpatch
+          configMap:
+            name: {{ default $.Release.Name $.Values.nameOverride }}-hotpatch
 {{- if .Values.index.extraVolumes }}
-      volumes: {{ toYaml (.Values.index.extraVolumes) | nindent 8 }}
+        {{ toYaml (.Values.index.extraVolumes) | nindent 8 }}
 {{- end }}
 {{- if .Values.index.tolerations }}
       tolerations: {{ toYaml (.Values.index.tolerations) | nindent 8 }}

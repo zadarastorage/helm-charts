@@ -36,28 +36,31 @@ data:
     #!/bin/bash
     set -e
     echo "== Hotpatching the container"
-    echo "== Installing patch"
-    apt-get -y update > /dev/null 2>&1
-    apt-get -y install patch > /dev/null 2>&1
-    prefix='/app/danswer'
-    [[ -d '/app/onyx' ]] && prefix='/app/onyx'
-    echo "== Copying vespa hosts.xml"
-    cp /hotpatch/hosts.xml ${prefix}/document_index/vespa/app_config/hosts.xml
-    echo "== Replacing ${prefix}/document_index/vespa/app_config/services.xml"
-    cp /hotpatch/services.xml ${prefix}/document_index/vespa/app_config/services.xml
-    echo "== Replacing ${prefix}/document_index/vespa/app_config/services.xml.jinja"
-    cp /hotpatch/services.xml.jinja ${prefix}/document_index/vespa/app_config/services.xml.jinja
+    [[ $(hostname) == {{ default $.Release.Name $.Values.nameOverride }}-index-* || $(hostname) == {{ default $.Release.Name $.Values.nameOverride }}-index-* ]] && pip install --upgrade transformers==4.51.0 || true
+    if [[ $(hostname) == {{ default $.Release.Name $.Values.nameOverride }}-api-* || $(hostname) == {{ default $.Release.Name $.Values.nameOverride }}-worker-* ]]; then
+      echo "== Installing patch"
+      apt-get -y update > /dev/null 2>&1
+      apt-get -y install patch > /dev/null 2>&1
+      prefix='/app/danswer'
+      [[ -d '/app/onyx' ]] && prefix='/app/onyx'
+      echo "== Copying vespa hosts.xml"
+      cp /hotpatch/hosts.xml ${prefix}/document_index/vespa/app_config/hosts.xml
+      echo "== Replacing ${prefix}/document_index/vespa/app_config/services.xml"
+      cp /hotpatch/services.xml ${prefix}/document_index/vespa/app_config/services.xml
+      echo "== Replacing ${prefix}/document_index/vespa/app_config/services.xml.jinja"
+      cp /hotpatch/services.xml.jinja ${prefix}/document_index/vespa/app_config/services.xml.jinja
 
-    for x in 'configs/app_configs.py' 'connectors/web/connector.py' 'connectors/zendesk/connector.py' 'document_index/vespa/index.py'; do
-      echo "== Evaluating ${prefix}/${x}"
-      md5sum ${prefix}/${x}
-      WEB_CONNECTOR=$(md5sum ${prefix}/${x} | cut -d ' ' -f1)
-      if [[ -e /hotpatch/${WEB_CONNECTOR}.patch ]]; then
-        echo "== Patching ${prefix}/${x}"
-        patch -p1 -u ${prefix}/${x} -i /hotpatch/${WEB_CONNECTOR}.patch
+      for x in 'configs/app_configs.py' 'connectors/web/connector.py' 'connectors/zendesk/connector.py' 'document_index/vespa/index.py'; do
+        echo "== Evaluating ${prefix}/${x}"
         md5sum ${prefix}/${x}
-      fi
-    done
+        WEB_CONNECTOR=$(md5sum ${prefix}/${x} | cut -d ' ' -f1)
+        if [[ -e /hotpatch/${WEB_CONNECTOR}.patch ]]; then
+          echo "== Patching ${prefix}/${x}"
+          patch -p1 -u ${prefix}/${x} -i /hotpatch/${WEB_CONNECTOR}.patch
+          md5sum ${prefix}/${x}
+        fi
+      done
+    fi
 
     echo "== Starting: ${@}"
     exec "${@}"

@@ -20,6 +20,7 @@ spec:
     metadata:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/hotpatch: {{ include (print $.Template.BasePath "/onyx-hotpatch.yaml") . | sha256sum }}
       labels:
         app: {{ default $.Release.Name $.Values.nameOverride }}
         service: inference-server
@@ -34,7 +35,11 @@ spec:
       containers:
         - image: {{ .Values.images.model.repository }}:{{ default .Chart.AppVersion .Values.images.model.tag }}
           name: inference-server
-          command: ["uvicorn", "model_server.main:app", "--host", "0.0.0.0", "--port", "9000"]
+          command: ["/usr/bin/bash", "/hotpatch/entrypoint.sh"]
+          args:
+            - /bin/sh
+            - -c
+            - uvicorn model_server.main:app --host 0.0.0.0 --port 9000
           ports:
             - name: 'http'
               containerPort: 9000
@@ -62,11 +67,18 @@ spec:
 {{- if .Values.inference.resources }}
           resources: {{ toYaml (.Values.inference.resources) | nindent 12 }}
 {{- end }}
-{{- if .Values.inference.extraVolumeMounts }}
-          volumeMounts: {{ toYaml (.Values.inference.extraVolumeMounts) | nindent 12 }}
+          volumeMounts:
+            - name: hotpatch
+              mountPath: /hotpatch
+{{- if .Values.index.extraVolumeMounts }}
+            {{ toYaml (.Values.index.extraVolumeMounts) | nindent 12 }}
 {{- end }}
-{{- if .Values.inference.extraVolumes }}
-      volumes: {{ toYaml (.Values.inference.extraVolumes) | nindent 8 }}
+      volumes:
+        - name: hotpatch
+          configMap:
+            name: {{ default $.Release.Name $.Values.nameOverride }}-hotpatch
+{{- if .Values.index.extraVolumes }}
+        {{ toYaml (.Values.index.extraVolumes) | nindent 8 }}
 {{- end }}
 {{- if .Values.inference.tolerations }}
       tolerations: {{ toYaml (.Values.inference.tolerations) | nindent 8 }}
