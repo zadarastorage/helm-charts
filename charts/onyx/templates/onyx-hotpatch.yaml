@@ -36,7 +36,7 @@ data:
     #!/bin/bash
     set -e
     echo "== Hotpatching the container"
-    [[ $(hostname) == {{ default $.Release.Name $.Values.nameOverride }}-index-* || $(hostname) == {{ default $.Release.Name $.Values.nameOverride }}-index-* ]] && pip install --upgrade transformers==4.51.0 || true
+    [[ $(hostname) == {{ default $.Release.Name $.Values.nameOverride }}-index-* || $(hostname) == {{ default $.Release.Name $.Values.nameOverride }}-inference-* ]] && pip install --upgrade transformers==4.51.0 || true
     if [[ $(hostname) == {{ default $.Release.Name $.Values.nameOverride }}-api-* || $(hostname) == {{ default $.Release.Name $.Values.nameOverride }}-worker-* ]]; then
       echo "== Installing patch"
       apt-get -y update > /dev/null 2>&1
