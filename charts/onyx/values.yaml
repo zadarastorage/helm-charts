@@ -313,6 +313,8 @@ cnpg:
 redis:
   # -- Enable preconfigured redis configuration
   enabled: true
+  image:
+    repository: "bitnamilegacy/redis"
   architecture: standalone # TODO Couldn't get sentinel to work
   master:
     revisionHistoryLimit: 2
