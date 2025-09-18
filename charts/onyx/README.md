@@ -2,7 +2,7 @@
 
 # onyx
 
-![Version: 0.0.23](https://img.shields.io/badge/Version-0.0.23-informational?style=flat-square) ![AppVersion: v0.29.1](https://img.shields.io/badge/AppVersion-v0.29.1-informational?style=flat-square)
+![Version: 0.0.24](https://img.shields.io/badge/Version-0.0.24-informational?style=flat-square) ![AppVersion: v0.29.1](https://img.shields.io/badge/AppVersion-v0.29.1-informational?style=flat-square)
 
 Gen-AI Chat for Teams - Think ChatGPT if it had access to your team's unique knowledge.
 
@@ -194,6 +194,7 @@ Some services do not play nice when scaled past 1 replica, they are noted in the
 | redis.auth.password | string | `"correct-horse-battery-staple"` |  |
 | redis.auth.sentinel | bool | `false` |  |
 | redis.enabled | bool | `true` | Enable preconfigured redis configuration |
+| redis.image.repository | string | `"bitnamilegacy/redis"` |  |
 | redis.master.resourcesPreset | string | `"medium"` |  |
 | redis.master.revisionHistoryLimit | int | `2` |  |
 | vespa.statefulSets.cfg.replicaCount | int | `3` |  |
